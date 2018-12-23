@@ -9,18 +9,42 @@
 </head>
 <body>
 
+<h2>AA Cost Calculator</h2>
+<p>by K. C. Ho</p>
+
+<p>&nbsp;</p>
+<div class="lines">
+	<p>使用說明：</p>
+	<p>1. 先於 "Result" 輸入參與 AA 制的人；</p>
+	<p>2. 於 "Dishes" 輸入每項東西的價錢 (如 "38.5")；</p>
+	<p>3. 勾選需要分擔該項東西的人；</p>
+	<p>4. (如適用) 勾選 "W_TAX" 以啟用折扣或稅項；</p>
+	<p>5. 於 "Price = $ &times;" 後方空格輸入折扣或稅項 (預設為 "1"，表示不附加任何折扣或稅項；服務費15%，請輸入"1.15"；有八折優惠，請輸入"0.8")。</p>
+</div>
+<p>&nbsp;</p>
+
 <div class="wrap">
 	<p>Dishes</p>
 	<p><a href="javascript:addDish()">+ Add Dish</a></p>
-	<table id="prices">
+	<table>
 		<tr id="price-head">
-			<th>Price</th>
+			<th>W_TAX</th>
+			<th colspan="2">Price</th>
 		</tr>
 		<tr id="d1" class="dish-row">
-			<td><input type="text" class="d-price" placeholder="$"></td>
+			<td><input type="checkbox" class="d-tax"></td>
+			<td colspan="2"><input type="text" class="d-price" placeholder="$"></td>
+		</tr>
+		<tr id="tax" class="tax">
+			<td colspan="3" class="wtax-if">if(W_TAX == true):</td>
+			<td rowspan="2" class="colspan" valign="bottom"><a href="javascript:calc()" class="highlight">Calculate >></a></td>
+		</tr>
+		<tr class="tax">
+			<td class="right-align">Price</td>
+			<td> = $ &times;&nbsp;</td>
+			<td><input type="text" id="d-tax" value="1"></td>
 		</tr>
 	</table>
-	<p><a href="javascript:calc()" class="highlight">Calculate >></a></p>
 </div>
 
 <div class="wrap">
@@ -50,10 +74,15 @@ body, p, h1, h2 {
 	margin: 0;
 	padding: 0;
 	font-family: Helvatica, Arial, sans-serif;
+}
+body {
+	padding: 15px;
+}
+body, p {
 	font-size: 13px;
 }
 .wrap {
-	padding: 15px;
+	padding: 15px 0;
 }
 table {
 	border-collapse: collapse;
@@ -105,6 +134,28 @@ strong {
 	font-size: 18px;
 	font-weight: normal;
 }
+tr#tax {
+	border-top: 5px solid #eee;
+}
+tr#tax td {
+	padding-top: 5px;
+}
+tr.tax td {
+	white-space: nowrap;
+}
+td.wtax-if {
+	text-align: left;
+	font-family: monospace;
+}
+td.right-align {
+	text-align: right;
+}
+td a {
+	margin: 0;
+}
+.lines p {
+	padding-top: 5px;
+}
 </style>
 
 <script
@@ -119,7 +170,7 @@ var curMaxDish = 1;
 function addDish(){
 	var newDiv = $("#d1").clone()
 		.attr('id', 'd' + (++curMaxDish));
-	$("#prices").append(newDiv);
+	newDiv.insertBefore("#tax");
 }
 
 function addPerson(){
@@ -144,6 +195,7 @@ function addPerson(){
 	checkboxDiv.find('#nchk').attr('id', '').addClass('d-p' + curPerson);
 
 	$(".dish-row").append(checkboxDiv);
+	$("td.colspan").attr("colspan", curMaxPerson);
 }
 
 var curThread = 0;
@@ -201,6 +253,11 @@ function changePName(){
 function calc(){
 
 	var price = [];
+	var tax = parseFloat($("#d-tax").val());
+
+	if(isNaN(tax)) {
+		tax = 1;
+	}
 
 	for(var i=1; i<=curMaxDish; i++){
 		var this_row = $("#d" + i);
@@ -213,26 +270,30 @@ function calc(){
 				price[ps] = 0;
 			}
 			if(this_row.find(".d-p"+ps).prop('checked')) {
-
 				price_for.push(ps);
 			}
 		}
 
+		if(isNaN(this_price)){
+			continue;
+		}
+
 		if(price_for.length===0) {
-			console.log(i);
 			for(var ps=1; ps<=curMaxPerson; ps++){
 				price_for.push(ps);
 			}
 		}
 
-		var shared_price = Math.ceil(this_price / price_for.length * 100) / 100;
+		var shared_price = this_price / price_for.length;
+
+		if(this_row.find('.d-tax').prop('checked')) {
+			shared_price = shared_price * tax;
+		}
 
 		for(var ind=0; ind<price_for.length; ind++){
 			price[price_for[ind]] += shared_price;
 		}
 	}
-
-	console.log(price);
 
 	for(var ps=1; ps<=curMaxPerson; ps++){
 		$("#p"+ps+"-total").text('$' + price[ps].toFixed(1));
