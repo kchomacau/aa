@@ -45,202 +45,202 @@
 	</table>
 </div>
 
-	<style>
-		body, p, h1, h2 {
-			margin: 0;
-			padding: 0;
-			font-family: Helvatica, Arial, sans-serif;
-			font-size: 13px;
-		}
-		.wrap {
-			padding: 15px;
-		}
-		table {
-			border-collapse: collapse;
-		}
-		th, td {
-			text-align: center;
-		}
-		th {
-			padding: 0 2px;
-		}
-		table,
-		input[type="text"] {
-			width: 100%;
-		}
-		input[type="text"] {
-			min-width: 100px;
-			border: 2px solid #eee;
-			font-size: 13px;
-			padding: 5px;
-			outline: 0;
-			-webkit-box-sizing: border-box;
-			-moz-box-sizing: border-box;
-			box-sizing: border-box;
-		}
-		input[type="checkbox"] {
-			width:30px;
-			height:30px;
-		}
-		div.warehouse {
-			display: none;
-		}
-		a {
-			display: block;
-			padding: 10px;
-			background: #cddc39;
-			-webkit-border-radius: 2px;
-			-moz-border-radius: 2px;
-			border-radius: 2px;
-			color: #fff;
-			margin: 8px 0 10px;
-			text-align: center;
-			text-decoration: none;
-		}
-		a.highlight {
-			background: dodgerblue;
-			font-weight: bold;
-		}
-		strong {
-			font-size: 18px;
-			font-weight: normal;
-		}
-	</style>
+<style>
+body, p, h1, h2 {
+	margin: 0;
+	padding: 0;
+	font-family: Helvatica, Arial, sans-serif;
+	font-size: 13px;
+}
+.wrap {
+	padding: 15px;
+}
+table {
+	border-collapse: collapse;
+}
+th, td {
+	text-align: center;
+}
+th {
+	padding: 0 2px;
+}
+table,
+input[type="text"] {
+	width: 100%;
+}
+input[type="text"] {
+	min-width: 100px;
+	border: 2px solid #eee;
+	font-size: 13px;
+	padding: 5px;
+	outline: 0;
+	-webkit-box-sizing: border-box;
+	-moz-box-sizing: border-box;
+	box-sizing: border-box;
+}
+input[type="checkbox"] {
+	width:30px;
+	height:30px;
+}
+div.warehouse {
+	display: none;
+}
+a {
+	display: block;
+	padding: 10px;
+	background: #cddc39;
+	-webkit-border-radius: 2px;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	color: #fff;
+	margin: 8px 0 10px;
+	text-align: center;
+	text-decoration: none;
+}
+a.highlight {
+	background: dodgerblue;
+	font-weight: bold;
+}
+strong {
+	font-size: 18px;
+	font-weight: normal;
+}
+</style>
 
-	<script
-		src="https://code.jquery.com/jquery-3.3.1.min.js"
-		integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
-		crossorigin="anonymous"></script>
+<script
+	src="https://code.jquery.com/jquery-3.3.1.min.js"
+	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
+	crossorigin="anonymous"></script>
 
-	<script>
-		var curMaxPerson = 0;
-		var curMaxDish = 1;
+<script>
+var curMaxPerson = 0;
+var curMaxDish = 1;
 
-		function addDish(){
-			var newDiv = $("#d1").clone()
-				.attr('id', 'd' + (++curMaxDish));
-			$("#prices").append(newDiv);
+function addDish(){
+	var newDiv = $("#d1").clone()
+		.attr('id', 'd' + (++curMaxDish));
+	$("#prices").append(newDiv);
+}
+
+function addPerson(){
+	var curPerson = ++curMaxPerson;
+
+	var div = $("#person-row").clone();
+	div.attr("id", "");
+	div.find(".n").text('#' + curPerson);
+	div.find("#ntxt")
+		.attr("id", "p" + curPerson + "-name")
+		.on('keyup', changePName);
+	div.find(".p")
+		.attr('id', 'p' + curPerson + '-total');
+	$("#people-table").append(div);
+	$("#price-head").append(
+		$("<th></th>")
+			.attr('id', 'p' + curPerson + '-n')
+	);
+
+	var checkboxDiv = $("#price-checkbox").clone();
+	checkboxDiv.attr('id', '');
+	checkboxDiv.find('#nchk').attr('id', '').addClass('d-p' + curPerson);
+
+	$(".dish-row").append(checkboxDiv);
+}
+
+var curThread = 0;
+
+function changePName_proc(thisThread) {
+	if(thisThread !== curThread){
+		return;
+	}
+
+	var persons = [];
+
+	for(var id=1; id<=curMaxPerson; id++){
+		var name = $('#p' + id + '-name').val();
+		$('#p' + id + '-n').text(name);
+
+		if(name !== ''){
+			persons.push(name);
 		}
+	}
+	localStorage.persons = JSON.stringify(persons);
+}
 
-		function addPerson(){
-			var curPerson = ++curMaxPerson;
+function fetchNameFromLS(){
+	var persons = JSON.parse(localStorage.persons);
+	for(var id=0; id<persons.length; id++){
+		addPerson();
+	}
+	for(var id=0; id<persons.length; id++){
+		$('#p' + (id+1) + '-name').val(persons[id]);
+		$('#p' + (id+1) + '-n').text(persons[id]);
+	}
+}
 
-			var div = $("#person-row").clone();
-			div.attr("id", "");
-			div.find(".n").text('#' + curPerson);
-			div.find("#ntxt")
-				.attr("id", "p" + curPerson + "-name")
-				.on('keyup', changePName);
-			div.find(".p")
-				.attr('id', 'p' + curPerson + '-total');
-			$("#people-table").append(div);
-			$("#price-head").append(
-				$("<th></th>")
-					.attr('id', 'p' + curPerson + '-n')
-			);
+for(var i=0; i<2; i++){
+	addDish();
+}
 
-			var checkboxDiv = $("#price-checkbox").clone();
-			checkboxDiv.attr('id', '');
-			checkboxDiv.find('#nchk').attr('id', '').addClass('d-p' + curPerson);
+if(localStorage.persons) {
+	fetchNameFromLS();
+}
+else{
+	for(var i=0; i<2; i++) {
+		addPerson();
+	}
+}
 
-			$(".dish-row").append(checkboxDiv);
-		}
+function changePName(){
+	var thisThread = ++curThread;
 
-		var curThread = 0;
+	window.setTimeout(function(){
+		changePName_proc(thisThread);
+	}, 100);
+}
 
-		function changePName_proc(thisThread) {
-			if(thisThread !== curThread){
-				return;
+function calc(){
+
+	var price = [];
+
+	for(var i=1; i<=curMaxDish; i++){
+		var this_row = $("#d" + i);
+		var this_price = parseFloat(this_row.find(".d-price").val());
+
+		var price_for = [];	// person
+
+		for(var ps=1; ps<=curMaxPerson; ps++) {
+			if(!price[ps]) {
+				price[ps] = 0;
 			}
+			if(this_row.find(".d-p"+ps).prop('checked')) {
 
-			var persons = [];
-
-			for(var id=1; id<=curMaxPerson; id++){
-				var name = $('#p' + id + '-name').val();
-				$('#p' + id + '-n').text(name);
-
-				if(name !== ''){
-					persons.push(name);
-				}
-			}
-			localStorage.persons = JSON.stringify(persons);
-		}
-
-		function fetchNameFromLS(){
-			var persons = JSON.parse(localStorage.persons);
-			for(var id=0; id<persons.length; id++){
-				addPerson();
-			}
-			for(var id=0; id<persons.length; id++){
-				$('#p' + (id+1) + '-name').val(persons[id]);
-				$('#p' + (id+1) + '-n').text(persons[id]);
+				price_for.push(ps);
 			}
 		}
 
-		for(var i=0; i<2; i++){
-			addDish();
-		}
-
-		if(localStorage.persons) {
-			fetchNameFromLS();
-		}
-		else{
-			for(var i=0; i<2; i++) {
-				addPerson();
-			}
-		}
-
-		function changePName(){
-			var thisThread = ++curThread;
-
-			window.setTimeout(function(){
-				changePName_proc(thisThread);
-			}, 100);
-		}
-
-		function calc(){
-
-			var price = [];
-
-			for(var i=1; i<=curMaxDish; i++){
-				var this_row = $("#d" + i);
-				var this_price = parseFloat(this_row.find(".d-price").val());
-
-				var price_for = [];	// person
-
-				for(var ps=1; ps<=curMaxPerson; ps++) {
-					if(!price[ps]) {
-						price[ps] = 0;
-					}
-					if(this_row.find(".d-p"+ps).prop('checked')) {
-
-						price_for.push(ps);
-					}
-				}
-
-				if(price_for.length===0) {
-					console.log(i);
-					for(var ps=1; ps<=curMaxPerson; ps++){
-						price_for.push(ps);
-					}
-				}
-
-				var shared_price = Math.ceil(this_price / price_for.length * 100) / 100;
-
-				for(var ind=0; ind<price_for.length; ind++){
-					price[price_for[ind]] += shared_price;
-				}
-			}
-
-			console.log(price);
-
+		if(price_for.length===0) {
+			console.log(i);
 			for(var ps=1; ps<=curMaxPerson; ps++){
-				$("#p"+ps+"-total").text('$' + price[ps].toFixed(1));
+				price_for.push(ps);
 			}
-
-			window.scrollTo(0, document.getElementById("people-anchor").offsetTop);
 		}
-	</script>
+
+		var shared_price = Math.ceil(this_price / price_for.length * 100) / 100;
+
+		for(var ind=0; ind<price_for.length; ind++){
+			price[price_for[ind]] += shared_price;
+		}
+	}
+
+	console.log(price);
+
+	for(var ps=1; ps<=curMaxPerson; ps++){
+		$("#p"+ps+"-total").text('$' + price[ps].toFixed(1));
+	}
+
+	window.scrollTo(0, document.getElementById("people-anchor").offsetTop);
+}
+</script>
 	
 </body>
 </html>
