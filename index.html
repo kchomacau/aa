@@ -16,8 +16,8 @@
 <div class="lines">
 	<p>使用說明：</p>
 	<p>1. 先於 "Result" 輸入參與 AA 制的人；</p>
-	<p>2. 於 "Dishes" 輸入每項東西的價錢 (如 "38.5")；</p>
-	<p>3. 勾選需要分擔該項東西的人；</p>
+	<p>2. 於 "Dishes" 輸入每項東西的總價 (如 "38.5")；</p>
+	<p>3. 勾選需要分擔該項東西的人 ("全不選" 即 "所有人一同分擔")；</p>
 	<p>4. (如適用) 勾選 "W_TAX" 以啟用/停用折扣或稅項；</p>
 	<p>5. 於 "Price = $ &times;" 後方空格輸入折扣或稅項 (預設為 "1"，表示不附加任何折扣或稅項；服務費15%，請輸入"1.15"；全單八折優惠，請輸入"0.8")。</p>
 </div>
@@ -29,15 +29,20 @@
 	<table>
 		<tr id="price-head">
 			<th>W_TAX</th>
-			<th colspan="2">Price</th>
+			<th colspan="2">Total Price</th>
 		</tr>
 		<tr id="d1" class="dish-row">
-			<td><input type="checkbox" class="d-tax" checked="true"></td>
-			<td colspan="2"><input type="text" class="d-price" placeholder="$"></td>
+			<td>
+				<input type="checkbox" class="d-tax" checked="true">
+			</td>
+			<td colspan="2" class="right-align">
+				<input type="text" class="d-price" placeholder="$">
+				<br><small class="d-cal">= $</small>
+			</td>
 		</tr>
 		<tr id="tax" class="tax">
 			<td colspan="3" class="wtax-if">if(W_TAX == true):</td>
-			<td rowspan="2" class="colspan" valign="bottom"><a href="javascript:calc()" class="highlight">Calculate >></a></td>
+			<td rowspan="2" class="colspan" valign="bottom"><a href="javascript:calc_total()" class="highlight">Calculate >></a></td>
 		</tr>
 		<tr class="tax">
 			<td class="right-align">Price</td>
@@ -64,7 +69,7 @@
 			<td>
 				<input type="text" id="ntxt" placeholder="(Name?)">
 			</td>
-			<td class="p">$0.0</td>
+			<td class="p">$</td>
 		</tr>
 	</table>
 </div>
@@ -89,6 +94,7 @@ table {
 }
 th, td {
 	text-align: center;
+	white-space: nowrap;
 }
 th {
 	padding: 0 2px;
@@ -140,9 +146,6 @@ tr#tax {
 tr#tax td {
 	padding-top: 5px;
 }
-tr.tax td {
-	white-space: nowrap;
-}
 td.wtax-if {
 	text-align: left;
 	font-family: monospace;
@@ -156,6 +159,9 @@ td a {
 .lines p {
 	padding-top: 5px;
 }
+td small {
+	color: #aaa;
+}
 </style>
 
 <script
@@ -167,10 +173,22 @@ td a {
 var curMaxPerson = 0;
 var curMaxDish = 1;
 
+function toNum(string){
+	try {return eval(string);} catch (e) {return NaN;}
+}
+function mapTriggers(){
+	$("input[type='checkbox']").change(calc);
+	$("input[type='text']").on("keyup", calc);
+}
+
+mapTriggers();
+
 function addDish(){
 	var newDiv = $("#d1").clone()
-		.attr('id', 'd' + (++curMaxDish));
+		.attr('id', 'd' + (++curMaxDish))
+		;
 	newDiv.insertBefore("#tax");
+	return mapTriggers();
 }
 
 function addPerson(){
@@ -196,12 +214,14 @@ function addPerson(){
 
 	$(".dish-row").append(checkboxDiv);
 	$("td.colspan").attr("colspan", curMaxPerson);
+	return mapTriggers();
 }
 
-var curThread = 0;
+var curThread_name = 0;
+var curThread_price = 0;
 
 function changePName_proc(thisThread) {
-	if(thisThread !== curThread){
+	if(thisThread !== curThread_name){
 		return;
 	}
 
@@ -243,7 +263,7 @@ else{
 }
 
 function changePName(){
-	var thisThread = ++curThread;
+	var thisThread = ++curThread_name;
 
 	window.setTimeout(function(){
 		changePName_proc(thisThread);
@@ -251,9 +271,18 @@ function changePName(){
 }
 
 function calc(){
+	var thisThread = ++curThread_price;
 
+	window.setTimeout(function(){
+		calc_proc(thisThread);
+	}, 100);
+}
+
+function calc_each(return_price_raw){
+
+	var return_price = !(return_price_raw===false);
 	var price = [];
-	var tax = parseFloat($("#d-tax").val());
+	var tax = toNum($("#d-tax").val());
 
 	if(isNaN(tax)) {
 		tax = 1;
@@ -261,39 +290,63 @@ function calc(){
 
 	for(var i=1; i<=curMaxDish; i++){
 		var this_row = $("#d" + i);
-		var this_price = parseFloat(this_row.find(".d-price").val());
+		var this_price = toNum(this_row.find(".d-price").val());
 
 		var price_for = [];	// person
 
 		for(var ps=1; ps<=curMaxPerson; ps++) {
-			if(!price[ps]) {
+			if(return_price && !price[ps]) {
 				price[ps] = 0;
 			}
 			if(this_row.find(".d-p"+ps).prop('checked')) {
 				price_for.push(ps);
 			}
 		}
-
 		if(isNaN(this_price)){
-			continue;
+			this_price = 0;
 		}
+
+		var text = '各付';
 
 		if(price_for.length===0) {
 			for(var ps=1; ps<=curMaxPerson; ps++){
 				price_for.push(ps);
 			}
+			text = price_for.length+'人各付';
 		}
-
 		var shared_price = this_price / price_for.length;
 
 		if(this_row.find('.d-tax').prop('checked')) {
 			shared_price = shared_price * tax;
 		}
 
-		for(var ind=0; ind<price_for.length; ind++){
-			price[price_for[ind]] += shared_price;
+		if(return_price){
+			for(var ind=0; ind<price_for.length; ind++){
+				price[price_for[ind]] += shared_price;
+			}
+		}
+		else{
+			this_row.find(".d-cal").text('= '+text+'$' + shared_price.toFixed(1));
 		}
 	}
+	if(return_price){
+		return price;
+	}
+	return false;
+}
+
+function calc_proc(thisThread){
+
+	if(thisThread !== curThread_price){
+		return;
+	}
+	$("td.p").text('$');
+	calc_each(false);
+}
+
+function calc_total(){
+
+	var price = calc_each();
 
 	for(var ps=1; ps<=curMaxPerson; ps++){
 		$("#p"+ps+"-total").text('$' + price[ps].toFixed(1));
