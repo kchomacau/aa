@@ -203,6 +203,12 @@ body.keyboard-hidden #keyboard {
     white-space: inherit;
     text-overflow: inherit;
 }
+#keyboard > span.disp.persons.person-alert {
+	color:#ff5722;
+	-webkit-animation: blink 0.3s linear 2;
+	-moz-animation: blink 0.3s linear 2;
+	animation: blink 0.3s linear 2;
+}
 #keyboard > span.disp.top {
 	height: 10%;
 	text-align: right;
@@ -469,6 +475,11 @@ function getName(i){
 
 function showPersons(targ){
 	if(targ) {
+		if(targ.attr('id')==='d-tax') {
+			$("tr").addClass("active-row");
+			$(".disp.persons").removeClass('person-alert').text('輸入稅項或折扣');
+			return;
+		}
 	}
 	else {
 		return;
@@ -496,7 +507,7 @@ function showPersons(targ){
 		}
 	}
 
-	$(".disp.persons").text(checked.join(' + '));
+	$(".disp.persons").removeClass('person-alert').text('for: ' + checked.join(' + '));
 	return false;
 }
 
@@ -512,7 +523,6 @@ function popKeyboard(ths){
 	targ.addClass("active");
 
 	showPersons(targ);
-
 	keyboard_target = targ;
 	curVal = this_val.split('');
 	return updateKeyboard(this_val);
@@ -539,6 +549,25 @@ var keyboard_target;
 $("#keyboard button").click(receiveNumpad);
 
 function goTo(param){
+
+	if($('.person-alert').length === 0){
+		// check if forgot select
+
+		var chk_count = 0;
+		
+		keyboard_target.parent().parent().find("input[type='checkbox']").each(function(i){
+			if(i>0 && $(this).prop('checked')) {
+				chk_count++;
+				return false;
+			}
+		});
+
+		if(chk_count===0){
+			$('.persons').addClass('person-alert');
+			return false;
+		}
+	}
+
 	var list = $(".wrap .fake-input");
 	var target;
 
