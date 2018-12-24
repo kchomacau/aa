@@ -31,15 +31,6 @@
 			<th>W_TAX</th>
 			<th colspan="2">Total Price</th>
 		</tr>
-		<tr id="d1" class="dish-row">
-			<td>
-				<input type="checkbox" class="d-tax" checked="true">
-			</td>
-			<td colspan="2" class="right-align">
-				<div class="fake-input d-price"></div>
-				<br><small class="d-cal">= $</small>
-			</td>
-		</tr>
 		<tr id="tax" class="tax">
 			<td colspan="3" class="wtax-if">if(W_TAX == true):</td>
 			<td rowspan="2" class="colspan" valign="bottom"><!-- <a href="javascript:calc_total()" class="highlight">Calculate >></a> -->&nbsp;</td>
@@ -70,6 +61,15 @@
 				<input type="text" id="ntxt" placeholder="(Name?)">
 			</td>
 			<td class="p">$</td>
+		</tr>
+		<tr id="d0" class="dish-row">
+			<td>
+				<input type="checkbox" class="d-tax" checked="true">
+			</td>
+			<td colspan="2" class="right-align">
+				<div class="fake-input d-price"></div>
+				<br><small class="d-cal">= $</small>
+			</td>
 		</tr>
 	</table>
 </div>
@@ -409,7 +409,7 @@ td small {
 
 <script>
 var curMaxPerson = 0;
-var curMaxDish = 1;
+var curMaxDish = 0;
 
 var curVal = [];
 
@@ -489,6 +489,18 @@ function goTo(param){
 	}
 
 	if(list[target]) {
+		if(list[target].id === 'd-tax') {
+			if(keyboard_target.text() !== ''){
+				// add one more row
+				return addDish(function(){
+					var le = $('.fake-input');
+					popKeyboard($(le[le.length-3]));
+					// -1=LAST(#warehouse)
+					// -2=TAX(#d-tax)
+					// -3=target
+				});
+			}
+		}
 		return popKeyboard($(list[target]));
 	}
 	else {
@@ -507,6 +519,9 @@ function receiveNumpad(){
 	var last_char = curVal[curVal.length-1];
 	var can_use_opr = (curVal.length > 0) && (allow_last.indexOf(last_char) !== -1);
 
+	if(curVal.join('')==='0'){
+		curVal = [];
+	}
 	if(num) {
 		if(num === 'Z') {	// '0'
 			curVal.push('0');
@@ -546,18 +561,23 @@ function receiveNumpad(){
 	else if(text === '0') {
 		curVal = [];
 	}
-	keyboard_target.text(text);
+	keyboard_target.text((text==='0' ? '' : text));
 	return updateKeyboard(text);
 }
 
 mapTriggers();
 
-function addDish(){
-	var newDiv = $("#d1").clone()
+function addDish(callback_function){
+	var newDiv = $("#d0").clone()
 		.attr('id', 'd' + (++curMaxDish))
 		;
 	newDiv.insertBefore("#tax");
-	return mapTriggers();
+	mapTriggers();
+
+	if(callback_function) {
+		return callback_function();
+	}
+	return false;
 }
 
 function addPerson(){
@@ -618,7 +638,7 @@ function fetchNameFromLS(){
 	}
 }
 
-for(var i=0; i<2; i++){
+for(var i=1; i<=3; i++){
 	addDish();
 }
 
