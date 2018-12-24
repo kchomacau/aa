@@ -79,7 +79,8 @@
 </div>
 
 <div id="keyboard"><!--
- --><span id="num-disp">
+ --><span class="disp persons"></span><!--
+ --><span class="disp top">
 		<span id="user-input">0</span><!--
 	 --><span class="result-wrap">
 	 		&nbsp;=
@@ -87,13 +88,13 @@
 	 	</span>
 	</span><!--
  --><span>
-		<button data-num="7">7</button>
+		<button data-num="1">1</button>
 	</span><!--
  --><span>
-		<button data-num="8">8</button>
+		<button data-num="2">2</button>
 	</span><!--
  --><span>
-		<button data-num="9">9</button>
+		<button data-num="3">3</button>
 	</span><!--
  --><span>
 		<button class="opr" data-num="*">&times;</button>
@@ -121,13 +122,13 @@
 		</button>
 	</span><!--
  --><span>
-		<button data-num="1">1</button>
+		<button data-num="7">7</button>
 	</span><!--
  --><span>
-		<button data-num="2">2</button>
+		<button data-num="8">8</button>
 	</span><!--
  --><span>
-		<button data-num="3">3</button>
+		<button data-num="9">9</button>
 	</span><!--
  --><span>
 		<button class="opr" data-num="+">+</button>
@@ -164,7 +165,7 @@ div.fake-input,
 }
 #keyboard-placeholder,
 #keyboard {
-	height: 220px;
+	height: 270px;
 }
 #keyboard {
 	position: fixed;
@@ -179,7 +180,7 @@ body.keyboard-hidden #keyboard {
 	display: none;
 }
 #keyboard > span {
-	height: 22%;
+	height: 18%;
 	width: 20%;
 	display: inline-block;
 	vertical-align: middle;
@@ -193,12 +194,20 @@ body.keyboard-hidden #keyboard {
 #keyboard > span.colspan-2 {
 	width: 40%;
 }
-#keyboard > span#num-disp {
-	height: 12%;
+#keyboard > span.disp {
 	width: 100%;
+	display: block;
+}
+#keyboard > span.disp.persons {
+	color: #aaa;
+    white-space: inherit;
+    text-overflow: inherit;
+}
+#keyboard > span.disp.top {
+	height: 10%;
 	text-align: right;
 }
-#keyboard > span#num-disp > span {
+#keyboard > span.disp > span {
 	display: inline-block;
 	vertical-align: middle;
 }
@@ -304,6 +313,7 @@ div.fake-input {
 }
 div.fake-input {
 	height: 30px;
+	vertical-align: bottom;
 	white-space: nowrap;
 	line-height: 16px;
 	overflow: hidden;
@@ -378,6 +388,12 @@ strong {
 	font-size: 18px;
 	font-weight: normal;
 }
+tr.dish-row {
+	opacity: 0.6; 
+}
+tr.dish-row.active-row {
+	opacity: 1; 
+}
 tr#tax {
 	border-top: 5px solid #eee;
 }
@@ -400,6 +416,9 @@ td a {
 td small {
 	color: #aaa;
 }
+th.name-header {
+	vertical-align: bottom;
+}
 </style>
 
 <script
@@ -419,8 +438,13 @@ function toNum(string){
 
 $("a").click(hideKeyboard);
 
+function onCheckboxChanged(){
+	showPersons(keyboard_target);
+	calc();
+}
+
 function mapTriggers(){
-	$("input[type='checkbox']").change(calc);
+	$("input[type='checkbox']").change(onCheckboxChanged);
 	$("input[type='text']").click(hideKeyboard);
 	$(".fake-input").click(popThis);
 	// $("input[type='text']").on("keyup", calc);
@@ -428,11 +452,52 @@ function mapTriggers(){
 
 function hideKeyboard(){
 	$("body").addClass("keyboard-hidden");
-	return keyboard_target.removeClass("active");
+
+	if(keyboard_target){
+		keyboard_target.removeClass("active");
+	}
+	return keyboard_target=null;
 }
 
 function popThis(){
 	return popKeyboard($(this));
+}
+
+function getName(i){
+	return $('#p' + i + '-name').val();
+}
+
+function showPersons(targ){
+	if(targ) {
+	}
+	else {
+		return;
+	}
+	var parent = targ.parent().parent();
+	$("tr").removeClass("active-row");
+	parent.addClass("active-row");
+
+	var checkboxes = parent.find("input[type='checkbox']");
+
+	var checked = [];
+	checkboxes.each(function(i){
+		if(i>0 && $(this).prop('checked')) {
+			var name = getName(i);
+			if(name !== '') {
+				checked.push(name);
+			}
+		}
+	});
+	if(checked.length===0) {
+		for(var i=1; i<=curMaxPerson; i++){
+			var name = getName(i);
+			if(name !== '')
+				checked.push(name);
+		}
+	}
+
+	$(".disp.persons").text(checked.join(' + '));
+	return false;
 }
 
 function popKeyboard(ths){
@@ -445,6 +510,8 @@ function popKeyboard(ths){
 	$('.fake-input').removeClass("active");
 	window.scrollTo(0, targ.offset().top - Math.floor(windowHeight/4));
 	targ.addClass("active");
+
+	showPersons(targ);
 
 	keyboard_target = targ;
 	curVal = this_val.split('');
@@ -472,7 +539,7 @@ var keyboard_target;
 $("#keyboard button").click(receiveNumpad);
 
 function goTo(param){
-	var list = $(".fake-input");
+	var list = $(".wrap .fake-input");
 	var target;
 
 	for(var i=0; i<list.length; i++){
@@ -595,6 +662,7 @@ function addPerson(){
 	$("#price-head").append(
 		$("<th></th>")
 			.attr('id', 'p' + curPerson + '-n')
+			.addClass("name-header")
 	);
 
 	var checkboxDiv = $("#price-checkbox").clone();
@@ -609,17 +677,19 @@ function addPerson(){
 var curThread_name = 0;
 var curThread_price = 0;
 
+function disp(str) {
+	return str.split('').join("<br>");
+}
+
 function changePName_proc(thisThread) {
 	if(thisThread !== curThread_name){
 		return;
 	}
-
 	var persons = [];
 
 	for(var id=1; id<=curMaxPerson; id++){
-		var name = $('#p' + id + '-name').val();
-		$('#p' + id + '-n').text(name);
-
+		var name = getName(id);
+		$('#p' + id + '-n').html(disp(name));
 		if(name !== ''){
 			persons.push(name);
 		}
@@ -634,7 +704,7 @@ function fetchNameFromLS(){
 	}
 	for(var id=0; id<persons.length; id++){
 		$('#p' + (id+1) + '-name').val(persons[id]);
-		$('#p' + (id+1) + '-n').text(persons[id]);
+		$('#p' + (id+1) + '-n').html(disp(persons[id]));
 	}
 }
 
@@ -656,7 +726,7 @@ function changePName(){
 
 	window.setTimeout(function(){
 		changePName_proc(thisThread);
-	}, 100);
+	}, 300);
 }
 
 function calc(){
