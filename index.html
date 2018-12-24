@@ -138,13 +138,13 @@
 		</button>
 	</span><!--
  --><span>
-		<button data-num="Z">0</button>
-	</span><!--
- --><span>
 		<button data-num=".">.</button>
 	</span><!--
  --><span>
-		<button data-num="ZZ">00</button>
+		<button data-num="Z">0</button>
+	</span><!--
+ --><span>
+		<button class="opr" data-opr="C">C</button>
 	</span><!--
  --><span>
 		<button class="opr" data-num="/">&#247;</button>
@@ -167,7 +167,7 @@ div.fake-input,
 }
 #keyboard-placeholder,
 #keyboard {
-	height: 210px;
+	height: 220px;
 }
 #keyboard {
 	position: fixed;
@@ -377,9 +377,6 @@ a.highlight {
 	background: dodgerblue;
 	font-weight: bold;
 }
-a.disabled {
-
-}
 strong {
 	font-size: 18px;
 	font-weight: normal;
@@ -422,8 +419,12 @@ var curVal = [];
 function toNum(string){
 	try {return eval(string);} catch (e) {return NaN;}
 }
+
+$("a").click(hideKeyboard);
+
 function mapTriggers(){
 	$("input[type='checkbox']").change(calc);
+	$("input").click(hideKeyboard);
 	$(".fake-input").click(popThis);
 	// $("input[type='text']").on("keyup", calc);
 }
@@ -442,8 +443,10 @@ function popKeyboard(ths){
 	var targ = ths;
 	var this_val = targ.text();
 
+	var windowHeight = $("#keyboard").offset().top - $("html").scrollTop();
+
 	$('.fake-input').removeClass("active");
-	window.scrollTo(0, targ.offset().top);
+	window.scrollTo(0, targ.offset().top - Math.floor(windowHeight/4));
 	targ.addClass("active");
 
 	keyboard_target = targ;
@@ -523,6 +526,9 @@ function receiveNumpad(){
 		var opr = $(this).data('opr');
 
 		switch(opr) {
+			case 'C':
+				curVal = [];
+				break;
 			case 'B':
 				curVal.pop();
 				break;
