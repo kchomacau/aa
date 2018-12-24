@@ -27,33 +27,35 @@
 	<p>Dishes</p>
 	<p><a href="javascript:addDish()">+ Add Dish</a></p>
 	<table>
-		<tr id="price-head">
-			<th>W_TAX</th>
-			<th colspan="2">Total Price</th>
+		<tr class="price-head">
+			<th width="30">TX</th>
+			<th width="80">Total<br>Price</th>
+		</tr>
+		<tr class="price-head price-bottom">
+			<th colspan="2">&nbsp;</th>
 		</tr>
 		<tr id="tax" class="tax">
-			<td colspan="3" class="wtax-if">if(W_TAX == true):</td>
-			<td rowspan="2" class="colspan" valign="bottom"><!-- <a href="javascript:calc_total()" class="highlight">Calculate >></a> -->&nbsp;</td>
-		</tr>
-		<tr class="tax">
-			<td class="right-align">Price</td>
-			<td> = $ &times;&nbsp;</td>
-			<td><div class="fake-input" id="d-tax"></div></td>
+			<td class="wtax-if td-full-width">
+				if(TX == enabled):
+				<br>
+				&nbsp;&nbsp;Price = $ &times;
+				<div class="fake-input" id="d-tax"></div>
+			</td>
 		</tr>
 	</table>
 </div>
 
 <div class="wrap">
 	<p id="people-anchor"><strong>Result</strong></p>
-	<p><a href="javascript:addPerson()">+ Add Person</a></p>
 	<table id="people-table">
 	</table>
+	<p class="body-bottom-anchor"><a href="javascript:addPerson()">+ Add Person</a></p>
 </div>
 
 <div class="warehouse">
 	<table>
 		<tr>
-			<td id="price-checkbox"><input type="checkbox" id="nchk"></td>
+			<td id="price-checkbox" class="checkbox-hide"><input type="checkbox" id="nchk"></td>
 		</tr>
 		<tr id="person-row">
 			<td class="n">#</td>
@@ -66,7 +68,7 @@
 			<td>
 				<input type="checkbox" class="d-tax" checked="true">
 			</td>
-			<td colspan="2" class="right-align">
+			<td class="right-align">
 				<div class="fake-input d-price"></div>
 				<br><small class="d-cal">= $</small>
 			</td>
@@ -117,8 +119,8 @@
 		<button class="opr" data-num="-">-</button>
 	</span><!--
  --><span>
-		<button class="act" data-opr="N">
-			<span class="rotate">＞</span>
+		<button class="mac" data-opr="B">
+			<small>delete</small>
 		</button>
 	</span><!--
  --><span>
@@ -134,8 +136,8 @@
 		<button class="opr" data-num="+">+</button>
 	</span><!--
  --><span>
-		<button class="mac" data-opr="B">
-			<small>delete</small>
+		<button class="act mac" data-opr="Q">
+			<small>OK</small>
 		</button>
 	</span><!--
  --><span class="colspan-2">
@@ -148,8 +150,8 @@
 		<button class="opr" data-num="/">/</button>
 	</span><!--
  --><span>
-		<button class="act mac" data-opr="Q">
-			<small>OK</small>
+		<button class="act" data-opr="N">
+			<span class="rotate">＞</span>
 		</button>
 	</span>
 </div>
@@ -304,6 +306,10 @@ th, td {
 th {
 	padding: 0 2px;
 }
+th.name-header.tight {
+	line-height: 10px;
+	font-size: 12px;
+}
 table,
 input[type="text"],
 div.fake-input {
@@ -318,8 +324,10 @@ div.fake-input {
 	outline: 0;
 }
 div.fake-input {
+	min-width: inherit;
+	width: 80px;
 	height: 30px;
-	vertical-align: bottom;
+	vertical-align: middle;
 	white-space: nowrap;
 	line-height: 16px;
 	overflow: hidden;
@@ -371,6 +379,9 @@ input[type="checkbox"] {
 	width:30px;
 	height:30px;
 }
+td.checkbox-hide, th.checkbox-hide {
+	display: none;
+}
 div.warehouse {
 	display: none;
 }
@@ -395,7 +406,7 @@ strong {
 	font-weight: normal;
 }
 tr.dish-row {
-	opacity: 0.6; 
+	opacity: 0.4; 
 }
 tr.dish-row.active-row {
 	opacity: 1; 
@@ -407,8 +418,10 @@ tr#tax td {
 	padding-top: 5px;
 }
 td.wtax-if {
-	text-align: left;
 	font-family: monospace;
+}
+td.td-full-width {
+	text-align: left;
 }
 td.right-align {
 	text-align: right;
@@ -425,6 +438,10 @@ td small {
 th.name-header {
 	vertical-align: bottom;
 }
+.price-bottom th.name-header {
+	vertical-align: top;
+	padding-bottom: 5px;
+}
 </style>
 
 <script
@@ -437,6 +454,14 @@ var curMaxPerson = 0;
 var curMaxDish = 0;
 
 var curVal = [];
+
+var keyboard_target;
+var curThread_name = 0;
+var curThread_price = 0;
+var emptyPersons = [];
+
+mapTriggers();
+$("#keyboard button").click(receiveNumpad);
 
 function toNum(string){
 	try {return eval(string);} catch (e) {return NaN;}
@@ -528,6 +553,10 @@ function popKeyboard(ths){
 	return updateKeyboard(this_val);
 }
 
+function toF(num) {
+	return num.toFixed(1);
+}
+
 function updateKeyboard(text){
 
 	if(text === ''){
@@ -541,30 +570,33 @@ function updateKeyboard(text){
 	if(isNaN(n)){
 		n = '';
 	}
+	else{
+		n = toF(n);
+	}
 	$("#user-result").text(n);
 	return calc();
 }
-
-var keyboard_target;
-$("#keyboard button").click(receiveNumpad);
 
 function goTo(param){
 
 	if($('.person-alert').length === 0){
 		// check if forgot select
 
-		var chk_count = 0;
-		
-		keyboard_target.parent().parent().find("input[type='checkbox']").each(function(i){
-			if(i>0 && $(this).prop('checked')) {
-				chk_count++;
+		if(keyboard_target.attr('id')==='d-tax') {
+			// go.
+		}
+		else{
+			var chk_count = 0;
+			keyboard_target.parent().parent().find("input[type='checkbox']").each(function(i){
+				if(i>0 && $(this).prop('checked')) {
+					chk_count++;
+					return false;
+				}
+			});
+			if(chk_count===0){
+				$('.persons').addClass('person-alert');
 				return false;
 			}
-		});
-
-		if(chk_count===0){
-			$('.persons').addClass('person-alert');
-			return false;
 		}
 	}
 
@@ -661,13 +693,11 @@ function receiveNumpad(){
 	return updateKeyboard(text);
 }
 
-mapTriggers();
-
 function addDish(callback_function){
 	var newDiv = $("#d0").clone()
 		.attr('id', 'd' + (++curMaxDish))
 		;
-	newDiv.insertBefore("#tax");
+	newDiv.insertBefore(".price-bottom");
 	mapTriggers();
 
 	if(callback_function) {
@@ -678,7 +708,6 @@ function addDish(callback_function){
 
 function addPerson(){
 	var curPerson = ++curMaxPerson;
-
 	var div = $("#person-row").clone();
 	div.attr("id", "");
 	div.find(".n").text('#' + curPerson);
@@ -688,9 +717,9 @@ function addPerson(){
 	div.find(".p")
 		.attr('id', 'p' + curPerson + '-total');
 	$("#people-table").append(div);
-	$("#price-head").append(
+	$(".price-head").append(
 		$("<th></th>")
-			.attr('id', 'p' + curPerson + '-n')
+			.addClass('p' + curPerson + '-n')
 			.addClass("name-header")
 	);
 
@@ -699,12 +728,13 @@ function addPerson(){
 	checkboxDiv.find('#nchk').attr('id', '').addClass('d-p' + curPerson);
 
 	$(".dish-row").append(checkboxDiv);
-	$("td.colspan").attr("colspan", curMaxPerson);
+	// $("td.colspan").attr("colspan", curMaxPerson);
+	$("td.td-full-width").attr("colspan", curMaxPerson + 2);
+
+	window.scrollTo(0, $(".body-bottom-anchor").offset().top);
+	changePName_proc(++curThread_name);
 	return mapTriggers();
 }
-
-var curThread_name = 0;
-var curThread_price = 0;
 
 function disp(str) {
 	return str.split('').join("<br>");
@@ -715,15 +745,37 @@ function changePName_proc(thisThread) {
 		return;
 	}
 	var persons = [];
+	var emptyPers = [];
 
 	for(var id=1; id<=curMaxPerson; id++){
 		var name = getName(id);
-		$('#p' + id + '-n').html(disp(name));
+		$('.p' + id + '-n').removeClass('tight').html(disp(name));
+
+		if(name.length > 2){
+			$('.p' + id + '-n').addClass('tight');
+		}
+
 		if(name !== ''){
 			persons.push(name);
 		}
+		else{
+			emptyPers.push(id);
+		}
 	}
 	localStorage.persons = JSON.stringify(persons);
+	emptyPersons = emptyPers;
+	indicateEmpties();
+	return calc();
+}
+
+function indicateEmpties(){
+	var classN = 'checkbox-hide';
+
+	$('.' + classN).removeClass(classN);
+	for(var i=0; i<emptyPersons.length; i++){
+		$(".p" + emptyPersons[i] + "-n").addClass(classN);
+		$(".d-p" + emptyPersons[i]).parent().addClass(classN);
+	}
 }
 
 function fetchNameFromLS(){
@@ -733,8 +785,8 @@ function fetchNameFromLS(){
 	}
 	for(var id=0; id<persons.length; id++){
 		$('#p' + (id+1) + '-name').val(persons[id]);
-		$('#p' + (id+1) + '-n').html(disp(persons[id]));
 	}
+	return changePName_proc(++curThread_name);
 }
 
 for(var i=1; i<=3; i++){
@@ -774,6 +826,7 @@ function calc_each(return_price_raw){
 
 	if(isNaN(tax)) {
 		tax = 1;
+		$("#d-tax").text('1');
 	}
 
 	for(var i=1; i<=curMaxDish; i++){
@@ -786,6 +839,9 @@ function calc_each(return_price_raw){
 			if(return_price && !price[ps]) {
 				price[ps] = 0;
 			}
+			if(emptyPersons.indexOf(ps)!==-1){
+				continue;
+			}
 			if(this_row.find(".d-p"+ps).prop('checked')) {
 				price_for.push(ps);
 			}
@@ -794,15 +850,16 @@ function calc_each(return_price_raw){
 			this_price = 0;
 		}
 
-		var text = '各付';
-
 		if(price_for.length===0) {
 			for(var ps=1; ps<=curMaxPerson; ps++){
+				if(emptyPersons.indexOf(ps)!==-1){
+					continue;
+				}
 				price_for.push(ps);
 			}
-			text = price_for.length+'人各付';
 		}
 		var shared_price = this_price / price_for.length;
+		var text = price_for.length+'人 &times; ';
 
 		if(this_row.find('.d-tax').prop('checked')) {
 			shared_price = shared_price * tax;
@@ -814,7 +871,7 @@ function calc_each(return_price_raw){
 			}
 		// }
 		// else{
-			this_row.find(".d-cal").text('= '+text+'$' + shared_price.toFixed(1));
+			this_row.find(".d-cal").html('= '+text+'$' + toF(shared_price));
 		// }
 	}
 	if(return_price){
@@ -838,7 +895,7 @@ function calc_total(){
 	var price = calc_each();
 
 	for(var ps=1; ps<=curMaxPerson; ps++){
-		$("#p"+ps+"-total").text('$' + price[ps].toFixed(1));
+		$("#p"+ps+"-total").text('$' + toF(price[ps]));
 	}
 
 	// window.scrollTo(0, document.getElementById("people-anchor").offsetTop);
