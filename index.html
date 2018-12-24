@@ -42,7 +42,7 @@
 		</tr>
 		<tr id="tax" class="tax">
 			<td colspan="3" class="wtax-if">if(W_TAX == true):</td>
-			<td rowspan="2" class="colspan" valign="bottom"><a href="javascript:calc_total()" class="highlight">Calculate >></a></td>
+			<td rowspan="2" class="colspan" valign="bottom"><!-- <a href="javascript:calc_total()" class="highlight">Calculate >></a> -->&nbsp;</td>
 		</tr>
 		<tr class="tax">
 			<td class="right-align">Price</td>
@@ -424,7 +424,7 @@ $("a").click(hideKeyboard);
 
 function mapTriggers(){
 	$("input[type='checkbox']").change(calc);
-	$("input").click(hideKeyboard);
+	$("input[type='text']").click(hideKeyboard);
 	$(".fake-input").click(popThis);
 	// $("input[type='text']").on("keyup", calc);
 }
@@ -467,7 +467,8 @@ function updateKeyboard(text){
 	if(isNaN(n)){
 		n = '';
 	}
-	return $("#user-result").text(n);
+	$("#user-result").text(n);
+	return calc();
 }
 
 var keyboard_target;
@@ -500,6 +501,7 @@ function goTo(param){
 
 function receiveNumpad(){
 	var num = $(this).data('num');
+	$("#user-input").append(num);
 
 	var nums = '0123456789';
 	var allow_last = nums + '.';
@@ -645,7 +647,7 @@ function calc(){
 
 	window.setTimeout(function(){
 		calc_proc(thisThread);
-	}, 100);
+	}, 300);
 }
 
 function calc_each(return_price_raw){
@@ -690,14 +692,14 @@ function calc_each(return_price_raw){
 			shared_price = shared_price * tax;
 		}
 
-		if(return_price){
+		// if(return_price){
 			for(var ind=0; ind<price_for.length; ind++){
 				price[price_for[ind]] += shared_price;
 			}
-		}
-		else{
+		// }
+		// else{
 			this_row.find(".d-cal").text('= '+text+'$' + shared_price.toFixed(1));
-		}
+		// }
 	}
 	if(return_price){
 		return price;
@@ -711,7 +713,8 @@ function calc_proc(thisThread){
 		return;
 	}
 	$("td.p").text('$');
-	calc_each(false);
+	// calc_each(false);
+	calc_total();
 }
 
 function calc_total(){
@@ -722,7 +725,7 @@ function calc_total(){
 		$("#p"+ps+"-total").text('$' + price[ps].toFixed(1));
 	}
 
-	window.scrollTo(0, document.getElementById("people-anchor").offsetTop);
+	// window.scrollTo(0, document.getElementById("people-anchor").offsetTop);
 }
 </script>
 	
