@@ -433,7 +433,7 @@ td a {
 	padding-top: 5px;
 }
 td small {
-	color: #aaa;
+	color: #4e4e4e;
 }
 th.name-header {
 	vertical-align: bottom;
@@ -859,7 +859,6 @@ function calc_each(return_price_raw){
 			}
 		}
 		var shared_price = this_price / price_for.length;
-		var text = price_for.length+'人 &times; ';
 
 		if(this_row.find('.d-tax').prop('checked')) {
 			shared_price = shared_price * tax;
@@ -871,7 +870,7 @@ function calc_each(return_price_raw){
 			}
 		// }
 		// else{
-			this_row.find(".d-cal").html('= '+text+'$' + toF(shared_price));
+			this_row.find(".d-cal").html('= $' + toF(shared_price) + ' &times; '+price_for.length+'人');
 		// }
 	}
 	if(return_price){
