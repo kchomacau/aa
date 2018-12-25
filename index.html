@@ -708,7 +708,7 @@ function popKeyboard(ths){
 	const win = getWindowSpaceHeight(++curThread_body);
 	const target_pos = targ.offset().top - Math.ceil(win.height/4);
 
-	$(window).scrollTo(target_pos, 160);
+	$(window).scrollTo({left:0, top:target_pos}, 160);
 	$(window).resize(function(){
 		getWindowSpaceHeight_delay();
 	})
@@ -957,10 +957,10 @@ function addPerson(skipReturns_r){
 	// $("td.td-full-width").attr("colspan", curMaxPerson + 2);
 
 	if(skipReturns){
-		$(window).scrollTo($(".body-bottom-anchor"), 0);
+		$(window).scrollTo({left:0, top:"100%"}, 0);
 		return;
 	}
-	$(window).scrollTo($(".body-bottom-anchor"), 120);
+	$(window).scrollTo({left:0, top:"100%"}, 120);
 	changePName_proc(++curThread_name);
 	return mapTriggers();
 }
