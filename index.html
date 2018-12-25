@@ -504,6 +504,7 @@ var emptyPersons = [];
 mapTriggers();
 
 var canMouseDown = false;
+var prevWinHeight = window.innerHeight;
 
 // const kbHeight = 270;
 // const windowMinHeight = 90;
@@ -632,9 +633,18 @@ function setKbMaxHeight(minH){
 }
 
 function getWindowSpaceHeight(thisThread) {
+
 	if(thisThread !== curThread_body){
-		return;
+		if(thisThread % 10 === 0
+			&& window.innerHeight !== prevWinHeight) {
+			// Okay.
+		}
+		else{
+			return;
+		}
 	}
+
+	prevWinHeight = window.innerHeight;
 	var px16 = $("#d-tax").height();
 	var windowRatio = (px16 / 16);
 
