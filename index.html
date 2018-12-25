@@ -171,9 +171,13 @@ div.fake-input,
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
+.kb-height {
+	height: 270px;
+}
 #keyboard {
 	position: fixed;
 	max-width: 100%;
+	left: 0;
 	bottom: 0;
 	right: 0;
 	background: #eee;
@@ -476,8 +480,8 @@ mapTriggers();
 
 var canMouseDown = false;
 
-const kbHeight = 270;
-const windowMinHeight = 90;
+// const kbHeight = 270;
+// const windowMinHeight = 90;
 
 $("#keyboard button").mousedown(onMouseDown);
 $("#keyboard button").click(onClick);
@@ -581,18 +585,21 @@ function getWindowSpaceHeight(thisThread) {
 	if(thisThread !== curThread_body){
 		return;
 	}
+
+	$(".kb-height").css('max-height', ($(window).height() - $("#d-tax").height()*5));
+
 	// console.log('getWindowSpaceHeight()');
-	$(".kb-height").height(kbHeight);
-	$("#keyboard").css('left', 0);
-	$("#keyboard").css('width', 'auto');
+	// $(".kb-height").height(kbHeight);
+	// $("#keyboard").css('left', 0);
+	// $("#keyboard").css('width', 'auto');
 	var windowHeight = $("#keyboard").offset().top - $("html").scrollTop();
 
-	if(windowHeight < windowMinHeight) {
-		$(".kb-height").height($(".kb-height").height() - (windowMinHeight - windowHeight));
-		$("#keyboard").css('left', 'auto');
-		$("#keyboard").css('width', '270px');
-		windowHeight = windowMinHeight;
-	}
+	// if(windowHeight < windowMinHeight) {
+	// 	$(".kb-height").height($(".kb-height").height() - (windowMinHeight - windowHeight));
+	// 	$("#keyboard").css('left', 'auto');
+	// 	$("#keyboard").css('width', '270px');
+	// 	windowHeight = windowMinHeight;
+	// }
 	return windowHeight;
 }
 
