@@ -581,6 +581,10 @@ function getWindowSpaceHeight_delay(){
 	}, 300);
 }
 
+function setKbMaxHeight(minH){
+	return $(".kb-height").css('max-height', ($(window).height() - minH));
+}
+
 function getWindowSpaceHeight(thisThread) {
 	if(thisThread !== curThread_body){
 		return;
@@ -588,9 +592,7 @@ function getWindowSpaceHeight(thisThread) {
 	var px16 = $("#d-tax").height();
 	var windowRatio = (px16 / 16);
 
-	var windowMinHeight = px16*4;
-
-	$(".kb-height").css('max-height', ($(window).height() - windowMinHeight));
+	setKbMaxHeight(px16*5);
 	// console.log('getWindowSpaceHeight()');
 	// $(".kb-height").height(kbHeight);
 	$("#keyboard").css('left', 0);
@@ -600,6 +602,7 @@ function getWindowSpaceHeight(thisThread) {
 
 	if($(".disp.top").height() < (19 * windowRatio)) {
 	// 	$(".kb-height").height($(".kb-height").height() - (windowMinHeight - windowHeight));
+		setKbMaxHeight(px16*4);
 		$("#keyboard").css('left', 'auto');
 		$("#keyboard").css('width', '270px');
 		windowHeight = windowMinHeight;
