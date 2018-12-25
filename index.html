@@ -598,7 +598,8 @@ function getWindowSpaceHeight(thisThread) {
 	$("#keyboard").css('left', 0);
 	$("#keyboard").css('width', 'auto');
 
-	var windowHeight = $("#keyboard").offset().top - $("html").scrollTop();
+	// var windowHeight = $("#keyboard").offset().top - $("html").scrollTop();
+	var windowHeight = $(window).height() - $("#keyboard").height();
 
 	if($(".disp.top").height() < (19 * windowRatio)) {
 	// 	$(".kb-height").height($(".kb-height").height() - (windowMinHeight - windowHeight));
@@ -621,7 +622,7 @@ function popKeyboard(ths){
 
 	var win = getWindowSpaceHeight(++curThread_body);
 
-	window.scrollTo(0, (targ.offset().top - Math.ceil(win.height/4)) / win.ratio);
+	window.scrollTo(0, targ.offset().top - Math.ceil(win.height/4));
 
 	$(window).resize(function(){
 		getWindowSpaceHeight_delay();
