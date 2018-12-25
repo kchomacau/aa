@@ -18,7 +18,7 @@
 	<p>1. 先於 "Result" 輸入參與 AA 制的人；</p>
 	<p>2. 於 "Dishes" 輸入每項東西的總價 (如 "38.5")；</p>
 	<p>3. 勾選需要分擔該項東西的人 ("全不選" 即 "所有人一同分擔")；</p>
-	<p>4. (如適用) 勾選 "W_TAX" 以啟用/停用折扣或稅項；</p>
+	<p>4. (如適用) 勾選 "TX" 以啟用/停用折扣或稅項；</p>
 	<p>5. 於 "Price = $ &times;" 後方空格輸入折扣或稅項 (預設為 "1"，表示不附加任何折扣或稅項；服務費15%，請輸入"1.15"；全單八折優惠，請輸入"0.8")。</p>
 </div>
 <p>&nbsp;</p>
@@ -68,19 +68,19 @@
 			<td>
 				<input type="checkbox" class="d-tax" checked="true">
 			</td>
-			<td class="right-align">
+			<td class="left-align">
 				<div class="fake-input d-price"></div>
-				<br><small class="d-cal">= $</small>
+				<br><small class="d-cal">=$</small>
 			</td>
 		</tr>
 	</table>
 </div>
 
-<div id="keyboard-placeholder">
+<div id="keyboard-placeholder" class="kb-height">
 	&nbsp;
 </div>
 
-<div id="keyboard"><!--
+<div id="keyboard" class="kb-height"><!--
  --><span class="disp persons"></span><!--
  --><span class="disp top">
 		<span id="user-input">0</span><!--
@@ -157,6 +157,12 @@
 </div>
 
 <style>
+::-webkit-input-placeholder {
+	color: #ddd;
+}
+::-moz-placeholder {
+	color: #ddd;
+}
 input[type="text"],
 div.fake-input,
 #keyboard,
@@ -165,14 +171,10 @@ div.fake-input,
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
 }
-#keyboard-placeholder,
-#keyboard {
-	height: 270px;
-}
 #keyboard {
 	position: fixed;
+	max-width: 100%;
 	bottom: 0;
-	left: 0;
 	right: 0;
 	background: #eee;
 	padding: 5px;
@@ -338,7 +340,8 @@ div.fake-input {
 	-moz-border-radius: 2px;
 	border-radius: 2px;
 }
-div.fake-input.active {
+div.fake-input.active,
+input:focus {
 	border-color: dodgerblue;
 }
 div.fake-input.active:after {
@@ -408,7 +411,8 @@ strong {
 tr.dish-row {
 	opacity: 0.4; 
 }
-tr.dish-row.active-row {
+tr.dish-row.active-row,
+body.keyboard-hidden tr.dish-row {
 	opacity: 1; 
 }
 tr#tax {
@@ -423,6 +427,9 @@ td.wtax-if {
 td.td-full-width {
 	text-align: left;
 }
+td.left-align {
+	text-align: left;
+}
 td.right-align {
 	text-align: right;
 }
@@ -433,7 +440,7 @@ td a {
 	padding-top: 5px;
 }
 td small {
-	color: #4e4e4e;
+	color: #bbb;
 }
 th.name-header {
 	vertical-align: bottom;
@@ -458,10 +465,31 @@ var curVal = [];
 var keyboard_target;
 var curThread_name = 0;
 var curThread_price = 0;
+var curThread_body = 0;
 var emptyPersons = [];
 
 mapTriggers();
-$("#keyboard button").click(receiveNumpad);
+
+var canMouseDown = false;
+
+const kbHeight = 270;
+const windowMinHeight = 90;
+
+$("#keyboard button").mousedown(onMouseDown);
+$("#keyboard button").click(onClick);
+
+function onMouseDown(){
+	if(canMouseDown===false){
+		canMouseDown = true;
+		$("#keyboard button").off("click");
+	}
+	return receiveNumpad($(this));
+}
+function onClick(){
+	if(canMouseDown===false)
+		return receiveNumpad($(this));
+	return false;
+}
 
 function toNum(string){
 	try {return eval(string);} catch (e) {return NaN;}
@@ -483,6 +511,7 @@ function mapTriggers(){
 
 function hideKeyboard(){
 	$("body").addClass("keyboard-hidden");
+	$(window).off("resize");
 
 	if(keyboard_target){
 		keyboard_target.removeClass("active");
@@ -501,7 +530,7 @@ function getName(i){
 function showPersons(targ){
 	if(targ) {
 		if(targ.attr('id')==='d-tax') {
-			$("tr").addClass("active-row");
+			$(".dish-row").addClass("active-row");
 			$(".disp.persons").removeClass('person-alert').text('輸入稅項或折扣');
 			return;
 		}
@@ -536,15 +565,46 @@ function showPersons(targ){
 	return false;
 }
 
+function getWindowSpaceHeight_delay(){
+	var thisThread = ++curThread_body;
+
+	window.setTimeout(function(){
+		getWindowSpaceHeight(thisThread);
+	}, 300);
+}
+
+function getWindowSpaceHeight(thisThread) {
+	if(thisThread !== curThread_body){
+		return;
+	}
+	// console.log('getWindowSpaceHeight()');
+	$(".kb-height").height(kbHeight);
+	$("#keyboard").css('left', 0);
+	$("#keyboard").css('width', 'auto');
+	var windowHeight = $("#keyboard").offset().top - $("html").scrollTop();
+
+	if(windowHeight < windowMinHeight) {
+		$(".kb-height").height($(".kb-height").height() - (windowMinHeight - windowHeight));
+		$("#keyboard").css('left', 'auto');
+		$("#keyboard").css('width', '270px');
+		windowHeight = windowMinHeight;
+	}
+	return windowHeight;
+}
+
 function popKeyboard(ths){
+	// console.log('popKeyboard()');
 	$("body").removeClass("keyboard-hidden");
 	var targ = ths;
 	var this_val = targ.text();
 
-	var windowHeight = $("#keyboard").offset().top - $("html").scrollTop();
+	window.scrollTo(0, targ.offset().top - Math.floor(getWindowSpaceHeight(++curThread_body)/4));
+
+	$(window).resize(function(){
+		getWindowSpaceHeight_delay();
+	})
 
 	$('.fake-input').removeClass("active");
-	window.scrollTo(0, targ.offset().top - Math.floor(windowHeight/4));
 	targ.addClass("active");
 
 	showPersons(targ);
@@ -636,8 +696,8 @@ function goTo(param){
 	}
 }
 
-function receiveNumpad(){
-	var num = $(this).data('num');
+function receiveNumpad(ths){
+	var num = ths.data('num');
 	$("#user-input").append(num);
 
 	var nums = '0123456789';
@@ -665,7 +725,7 @@ function receiveNumpad(){
 		}
 	}
 	else {
-		var opr = $(this).data('opr');
+		var opr = ths.data('opr');
 
 		switch(opr) {
 			case 'C':
@@ -870,7 +930,7 @@ function calc_each(return_price_raw){
 			}
 		// }
 		// else{
-			this_row.find(".d-cal").html('= $' + toF(shared_price) + ' &times; '+price_for.length+'人');
+			this_row.find(".d-cal").html('=$' + toF(shared_price) + ' &times; '+price_for.length);
 		// }
 	}
 	if(return_price){
