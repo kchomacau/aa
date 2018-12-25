@@ -177,7 +177,7 @@ div.fake-input,
 #keyboard {
 	position: fixed;
 	max-width: 100%;
-	left: 0;
+	/*left: 0;*/
 	bottom: 0;
 	right: 0;
 	background: #eee;
@@ -585,22 +585,26 @@ function getWindowSpaceHeight(thisThread) {
 	if(thisThread !== curThread_body){
 		return;
 	}
+	var px16 = $("#d-tax").height();
+	var windowRatio = (px16 / 16);
 
-	$(".kb-height").css('max-height', ($(window).height() - $("#d-tax").height()*5));
+	var windowMinHeight = px16*4;
 
+	$(".kb-height").css('max-height', ($(window).height() - windowMinHeight));
 	// console.log('getWindowSpaceHeight()');
 	// $(".kb-height").height(kbHeight);
-	// $("#keyboard").css('left', 0);
-	// $("#keyboard").css('width', 'auto');
+	$("#keyboard").css('left', 0);
+	$("#keyboard").css('width', 'auto');
+
 	var windowHeight = $("#keyboard").offset().top - $("html").scrollTop();
 
-	// if(windowHeight < windowMinHeight) {
+	if($(".disp.top").height() < (19 * windowRatio)) {
 	// 	$(".kb-height").height($(".kb-height").height() - (windowMinHeight - windowHeight));
-	// 	$("#keyboard").css('left', 'auto');
-	// 	$("#keyboard").css('width', '270px');
-	// 	windowHeight = windowMinHeight;
-	// }
-	return windowHeight;
+		$("#keyboard").css('left', 'auto');
+		$("#keyboard").css('width', '270px');
+		windowHeight = windowMinHeight;
+	}
+	return windowHeight * windowRatio;
 }
 
 function popKeyboard(ths){
