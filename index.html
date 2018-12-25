@@ -607,7 +607,7 @@ function getWindowSpaceHeight(thisThread) {
 		$("#keyboard").css('width', '270px');
 		windowHeight = px16*4;
 	}
-	return windowHeight * windowRatio;
+	return windowHeight / windowRatio;
 }
 
 function popKeyboard(ths){
@@ -616,7 +616,7 @@ function popKeyboard(ths){
 	var targ = ths;
 	var this_val = targ.text();
 
-	window.scrollTo(0, targ.offset().top - Math.floor(getWindowSpaceHeight(++curThread_body)/4));
+	window.scrollTo(0, targ.offset().top - Math.ceil(getWindowSpaceHeight(++curThread_body)/4));
 
 	$(window).resize(function(){
 		getWindowSpaceHeight_delay();
