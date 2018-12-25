@@ -215,10 +215,17 @@ div.wtax-if {
 	right: 0;
 	background: #eee;
 	padding: 5px;
+	-webkit-transition: bottom 0.15s linear;
+	-moz-transition: bottom 0.15s linear;
+	transition: bottom 0.15s linear;
 }
 body.keyboard-hidden #keyboard-placeholder,
 body.keyboard-hidden #keyboard {
 	display: none;
+}
+body.keyboard-hidden #keyboard.pop-down {
+	display: block;
+	bottom: -270px;
 }
 #keyboard > span {
 	height: 18%;
@@ -522,6 +529,7 @@ var keyboard_target;
 var curThread_name = 0;
 var curThread_price = 0;
 var curThread_body = 0;
+var curThread_keyboard = 0;
 var emptyPersons = [];
 
 mapTriggers();
@@ -569,6 +577,11 @@ function mapTriggers(){
 
 function hideKeyboard(){
 	$("body").addClass("keyboard-hidden");
+	$("#keyboard").addClass("pop-down");
+	var thisThread = ++curThread_keyboard;
+	window.setTimeout(function(){
+		onFinishKeyboardAnimation(thisThread);
+	}, 200);
 	$(window).off("resize");
 	$(window).off("scroll");
 
@@ -651,7 +664,7 @@ function setKbMaxHeight(minH){
 	if(keyboard_bottom < 0){
 		keyboard_bottom = 0;
 	}
-	$("#keyboard").css('bottom', keyboard_bottom + 'px');
+	$("#keyboard").css('margin-bottom', keyboard_bottom + 'px');
 	return $(".kb-height").css('max-height', (window.innerHeight - minH));
 }
 
@@ -697,6 +710,13 @@ function getWindowSpaceHeight(thisThread) {
 		height: windowHeight,
 		ratio: windowRatio
 	};
+}
+
+function onFinishKeyboardAnimation(thisThread) {
+	if(thisThread !== curThread_keyboard) {
+		return;
+	}
+	$("#keyboard").removeClass("pop-down");
 }
 
 function popKeyboard(ths){
@@ -957,10 +977,9 @@ function addPerson(skipReturns_r){
 	// $("td.td-full-width").attr("colspan", curMaxPerson + 2);
 
 	if(skipReturns){
-		$(window).scrollTo({left:0, top:"100%"}, 0);
 		return;
 	}
-	$(window).scrollTo({left:0, top:"100%"}, 120);
+	$(window).scrollTo({left:0, top:"100%"}, 0);
 	changePName_proc(++curThread_name);
 	return mapTriggers();
 }
