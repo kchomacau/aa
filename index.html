@@ -3,7 +3,6 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
-	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<title>AA Cost Calculator</title>
 	<meta property="og:title" content="AA Cost Calculator" />
 	<meta property="og:description" content="AA制？輕鬆啦！" />
@@ -15,19 +14,21 @@
 
 <p>&nbsp;</p>
 <div class="lines">
-	<p>使用說明：</p>
-	<p>1. 先於 "Result" 輸入參與 AA 制的人；</p>
-	<p>2. 於 "Dishes" 輸入每項東西的總價 (如 "38.5")；</p>
-	<p>3. 勾選需要分擔該項東西的人 ("全不選" 即 "所有人一同分擔")；</p>
-	<p>4. (如適用) 勾選 "TX" 以啟用/停用折扣或稅項；</p>
-	<p>5. 於 "Price = $ &times;" 後方空格輸入折扣或稅項 (預設為 "1"，表示不附加任何折扣或稅項；服務費15%，請輸入"1.15"；全單八折優惠，請輸入"0.8")。</p>
+	<p class="section-head">使用說明</p>
+	<ol>
+		<li>先於 "Result" 輸入參與 AA 制的人；</li>
+		<li>於 "Dishes" 輸入每項東西的總價 (如 "38.5")；</li>
+		<li>勾選需要分擔該項東西的人 ("全不選" 即 "所有人一同分擔")；</li>
+		<li>(如適用) 勾選 "TX" 以啟用/停用折扣或稅項；</li>
+		<li>於 "Price = $ &times;" 後方空格輸入折扣或稅項 (預設為 "1"，表示不附加任何折扣或稅項；服務費15%，請輸入"1.15"；全單八折優惠，請輸入"0.8")。</li>
+	</ol>
 </div>
 <p>&nbsp;</p>
 
 <div class="wrap">
-	<p>Dishes</p>
+	<p class="section-head">Dishes</p>
 	<p><a href="javascript:addDish()">+ Add Dish</a></p>
-	<table>
+	<table id="dish-table">
 		<tr class="price-head">
 			<th width="30">TX</th>
 			<th width="80">Total<br>Price</th>
@@ -35,20 +36,23 @@
 		<tr class="price-head price-bottom">
 			<th colspan="2">&nbsp;</th>
 		</tr>
-		<tr id="tax" class="tax">
-			<td class="wtax-if td-full-width">
-				if(TX == enabled):
-				<br>
-				&nbsp;&nbsp;Price = $ &times;
-				<div class="fake-input" id="d-tax"></div>
-			</td>
-		</tr>
 	</table>
+
+	<p>if(TX == enabled):</p>
+	<div class="wtax-if">
+		Price = $ &times;
+		<div class="fake-input" id="d-tax"></div>
+	</div>
 </div>
 
 <div class="wrap">
-	<p id="people-anchor"><strong>Result</strong></p>
+	<p class="section-head" id="people-anchor">Result</p>
 	<table id="people-table">
+		<tr>
+			<th colspan="3" class="left-align">Active?</th>
+			<th>應付</th>
+			<th>已付</th>
+		</tr>
 	</table>
 	<p class="body-bottom-anchor"><a href="javascript:addPerson()">+ Add Person</a></p>
 </div>
@@ -59,11 +63,17 @@
 			<td id="price-checkbox" class="checkbox-hide"><input type="checkbox" id="nchk"></td>
 		</tr>
 		<tr id="person-row">
+			<td>
+				<input type="checkbox" class="a" checked>
+			</td>
 			<td class="n">#</td>
 			<td>
 				<input type="text" id="ntxt" placeholder="(Name?)">
 			</td>
-			<td class="p">$</td>
+			<td class="p pt-price">$</td>
+			<td>
+				<div class="f fake-input"></div>
+			</td>
 		</tr>
 		<tr id="d0" class="dish-row">
 			<td>
@@ -164,6 +174,12 @@
 ::-moz-placeholder {
 	color: #ddd;
 }
+ol, ul {
+	margin: 0 0 0 -27px;
+}
+ol li, ul li {
+	margin: 0 0 15px;
+}
 input[type="text"],
 div.fake-input,
 #keyboard,
@@ -171,6 +187,11 @@ div.fake-input,
 	-webkit-box-sizing: border-box;
 	-moz-box-sizing: border-box;
 	box-sizing: border-box;
+}
+div.wtax-if {
+	padding: 10px;
+	border: 1px dashed #ccc;
+	margin: 0 -5px;
 }
 .kb-height {
 	height: 270px;
@@ -214,9 +235,9 @@ body.keyboard-hidden #keyboard {
 }
 #keyboard > span.disp.persons.person-alert {
 	color:#ff5722;
-	-webkit-animation: blink 0.3s linear 2;
-	-moz-animation: blink 0.3s linear 2;
-	animation: blink 0.3s linear 2;
+	-webkit-animation: blink 0.3s linear 1;
+	-moz-animation: blink 0.3s linear 1;
+	animation: blink 0.3s linear 1;
 }
 #keyboard > span.disp.top {
 	height: 10%;
@@ -409,9 +430,19 @@ a.highlight {
 	background: dodgerblue;
 	font-weight: bold;
 }
+p.section-head {
+	font-weight: bold;
+	padding: 5px 15px 3px;
+	margin: 15px -15px 10px;
+	border-bottom: 1px dashed #222;
+	color: #222;
+}
 strong {
 	font-size: 18px;
 	font-weight: normal;
+}
+table#people-table tr th {
+	padding: 0 0 5px;
 }
 tr.dish-row {
 	opacity: 0.4; 
@@ -420,23 +451,16 @@ tr.dish-row.active-row,
 body.keyboard-hidden tr.dish-row {
 	opacity: 1; 
 }
-tr#tax {
-	border-top: 5px solid #eee;
-}
-tr#tax td {
-	padding-top: 5px;
-}
-td.wtax-if {
-	/*font-family: monospace;*/
-}
-td.td-full-width {
-	text-align: left;
-}
+th.left-align,
 td.left-align {
 	text-align: left;
 }
+th.right-align,
 td.right-align {
 	text-align: right;
+}
+td.pt-price {
+	padding: 0 8px;
 }
 td a {
 	margin: 0;
@@ -512,7 +536,8 @@ function onCheckboxChanged(){
 }
 
 function mapTriggers(){
-	$("input[type='checkbox']").change(onCheckboxChanged);
+	$("#dish-table input[type='checkbox']").change(onCheckboxChanged);
+	$("#people-table input[type='checkbox']").change(changePName);
 	$("input[type='text']").click(hideKeyboard);
 	$(".fake-input").click(popThis);
 	// $("input[type='text']").on("keyup", calc);
@@ -539,9 +564,22 @@ function getName(i){
 
 function showPersons(targ){
 	if(targ) {
-		if(targ.attr('id')==='d-tax') {
+		if(!targ.hasClass('d-price')) {
 			$(".dish-row").addClass("active-row");
-			$(".disp.persons").removeClass('person-alert').text('輸入稅項或折扣');
+			$(".disp.persons").removeClass('person-alert');
+
+			if(targ.attr('id')==='d-tax'){
+				$('.disp.persons').text('輸入稅項或折扣');
+			}
+			else if(targ.attr('id').indexOf('-paid')!==-1) {
+				var id = targ.attr('id').split('-')[0];
+				var val = $('#' + id + '-name').val();
+
+				if(val===''){
+					val = '(Person #'+id.substr(1)+')';
+				}
+				$('.disp.persons').text('輸入' + val + '已付金額');
+			}
 			return;
 		}
 	}
@@ -603,8 +641,6 @@ function getWindowSpaceHeight(thisThread) {
 	setKbMaxHeight(px16*5);
 	// console.log('getWindowSpaceHeight()');
 	// $(".kb-height").height(kbHeight);
-	$("#keyboard").css('left', 0);
-	$("#keyboard").css('width', 'auto');
 
 	// var windowHeight = $("#keyboard").offset().top - $("html").scrollTop();
 	var windowHeight = window.innerHeight - $("#keyboard").height();
@@ -612,9 +648,17 @@ function getWindowSpaceHeight(thisThread) {
 	if($(".disp.top").height() < (22 * windowRatio)) {
 	// 	$(".kb-height").height($(".kb-height").height() - (windowMinHeight - windowHeight));
 		setKbMaxHeight(px16*4);
+		$("#keyboard").css('right', 0);
 		$("#keyboard").css('left', 'auto');
 		$("#keyboard").css('width', '270px');
 		windowHeight = px16*4;
+	}
+	else{
+		$("#keyboard").css('left', 0);
+		$("#keyboard").css('right', 'auto');
+
+		var fullWidth = $(".section-head").width() + (30 * windowRatio);
+		$("#keyboard").css('width', fullWidth + 'px');
 	}
 	return {
 		height: windowHeight,
@@ -649,6 +693,9 @@ function popKeyboard(ths){
 }
 
 function toF(num) {
+	if(!num) {
+		num = 0;
+	}
 	return num.toFixed(1);
 }
 
@@ -677,10 +724,7 @@ function goTo(param){
 	if($('.person-alert').length === 0){
 		// check if forgot select
 
-		if(keyboard_target.attr('id')==='d-tax') {
-			// go.
-		}
-		else{
+		if(keyboard_target.hasClass('d-price')) {
 			var chk_count = 0;
 			keyboard_target.parent().parent().find("input[type='checkbox']").each(function(i){
 				if(i>0 && $(this).prop('checked')) {
@@ -716,11 +760,8 @@ function goTo(param){
 			if(keyboard_target.text() !== ''){
 				// add one more row
 				return addDish(function(){
-					var le = $('.fake-input');
-					popKeyboard($(le[le.length-3]));
-					// -1=LAST(#warehouse)
-					// -2=TAX(#d-tax)
-					// -3=target
+					var le = $('.wrap table .fake-input.d-price');
+					popKeyboard($(le[le.length-1]));
 				});
 			}
 		}
@@ -811,6 +852,10 @@ function addPerson(){
 		.on('keyup', changePName);
 	div.find(".p")
 		.attr('id', 'p' + curPerson + '-total');
+	div.find(".f")
+		.attr('id', 'p' + curPerson + '-paid');
+	div.find(".a")
+		.attr('id', 'p' + curPerson + '-ac');
 	$("#people-table").append(div);
 	$(".price-head").append(
 		$("<th></th>")
@@ -824,7 +869,7 @@ function addPerson(){
 
 	$(".dish-row").append(checkboxDiv);
 	// $("td.colspan").attr("colspan", curMaxPerson);
-	$("td.td-full-width").attr("colspan", curMaxPerson + 2);
+	// $("td.td-full-width").attr("colspan", curMaxPerson + 2);
 
 	window.scrollTo(0, $(".body-bottom-anchor").offset().top);
 	changePName_proc(++curThread_name);
@@ -844,16 +889,14 @@ function changePName_proc(thisThread) {
 
 	for(var id=1; id<=curMaxPerson; id++){
 		var name = getName(id);
-		$('.p' + id + '-n').removeClass('tight').html(disp(name));
-
-		if(name.length > 2){
-			$('.p' + id + '-n').addClass('tight');
-		}
-
 		if(name !== ''){
+			$('.p' + id + '-n').removeClass('tight').html(disp(name));
+			if(name.length > 2){
+				$('.p' + id + '-n').addClass('tight');
+			}
 			persons.push(name);
 		}
-		else{
+		if(name === '' || $('#p' + id + '-ac').prop('checked')===false){
 			emptyPers.push(id);
 		}
 	}
@@ -873,9 +916,12 @@ function indicateEmpties(){
 	}
 }
 
-function fetchNameFromLS(){
-	var persons = JSON.parse(localStorage.persons);
-	for(var id=0; id<persons.length; id++){
+function initPersons(persons){
+
+	if(persons.length===0) {
+		persons = ['User1'];
+	}
+	for(var id=0; id<=persons.length; id++){
 		addPerson();
 	}
 	for(var id=0; id<persons.length; id++){
@@ -884,12 +930,27 @@ function fetchNameFromLS(){
 	return changePName_proc(++curThread_name);
 }
 
+function withSymbol(price) {
+	if(price < 0) {
+		return '-$' + toF(0-price);
+	}
+	return '$' + toF(price);
+}
+
+function fetchNameFromLS(){
+	var persons = JSON.parse(localStorage.persons);
+	return initPersons(persons);
+}
+
 // for(var i=1; i<=3; i++){
-// 	addDish();
+addDish();
 // }
 
 if(localStorage.persons) {
 	fetchNameFromLS();
+}
+else {
+	initPersons([]);
 }
 // else{
 // 	for(var i=0; i<2; i++) {
@@ -965,7 +1026,7 @@ function calc_each(return_price_raw){
 			}
 		// }
 		// else{
-			this_row.find(".d-cal").html('=$' + toF(shared_price) + ' &times; '+price_for.length);
+			this_row.find(".d-cal").html('=' + withSymbol(shared_price) + ' &times; '+price_for.length);
 		// }
 	}
 	if(return_price){
@@ -989,7 +1050,12 @@ function calc_total(){
 	var price = calc_each();
 
 	for(var ps=1; ps<=curMaxPerson; ps++){
-		$("#p"+ps+"-total").text('$' + toF(price[ps]));
+
+		var paid = toNum($("#p"+ps+"-paid").text());
+		if(isNaN(paid)) {
+			paid = 0;
+		}
+		$("#p"+ps+"-total").text(withSymbol(price[ps] - paid));
 	}
 
 	// window.scrollTo(0, document.getElementById("people-anchor").offsetTop);
