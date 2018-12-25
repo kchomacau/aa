@@ -129,9 +129,14 @@
  --><span>
 		<button class="opr" data-num="-">-</button>
 	</span><!--
- --><span>
+ --><span class="changable-btn-normal">
 		<button class="mac" data-opr="B">
 			<small>delete</small>
+		</button>
+	</span><!--
+ --><span class="changable-btn-pastable cb-hide">
+		<button class="mac special" data-opr="T" id="ctrl_d">
+			<small>ctrl+D</small>
 		</button>
 	</span><!--
  --><span>
@@ -151,8 +156,14 @@
 			<span class="rotate">＞</span>
 		</button>
 	</span><!--
- --><span class="colspan-2">
+ --><span class="colspan-2 changable-btn-0">
 		<button data-num="Z">0</button>
+	</span><!--
+ --><span class="changable-btn-00">
+		<button data-num="Z">0</button>
+	</span><!--
+ --><span class="changable-btn-00">
+		<button data-num="ZZZ">000</button>
 	</span><!--
  --><span>
 		<button data-num=".">.</button>
@@ -298,6 +309,9 @@ body.keyboard-hidden #keyboard {
 	background: #748288;
 	color: #fff;
 }
+#keyboard button.mac.special {
+	background: #f7984a;
+}
 #keyboard button.mac small {
 	right: 5px;
 	bottom: 5px;
@@ -408,8 +422,15 @@ input[type="checkbox"] {
 	width:30px;
 	height:30px;
 }
-td.checkbox-hide, th.checkbox-hide {
+td.checkbox-hide, th.checkbox-hide,
+input.cb-hide,
+button.cb-hide,
+#keyboard > span.cb-hide {
 	display: none;
+}
+td.cb-hide {
+	text-indent: -999px;
+	visibility: hidden;
 }
 div.warehouse {
 	display: none;
@@ -488,6 +509,8 @@ th.name-header {
 	src="https://code.jquery.com/jquery-3.3.1.min.js"
 	integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8="
 	crossorigin="anonymous"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-scrollTo/2.1.2/jquery.scrollTo.min.js"></script>
 
 <script>
 var curMaxPerson = 0;
@@ -587,11 +610,11 @@ function showPersons(targ){
 	else {
 		return;
 	}
-	var parent = targ.parent().parent();
+	const parent = targ.parent().parent();
 	$("tr").removeClass("active-row");
 	parent.addClass("active-row");
 
-	var checkboxes = parent.find("input[type='checkbox']");
+	const checkboxes = parent.find("input[type='checkbox']");
 
 	var checked = [];
 	checkboxes.each(function(i){
@@ -615,7 +638,7 @@ function showPersons(targ){
 }
 
 function getWindowSpaceHeight_delay(){
-	var thisThread = ++curThread_body;
+	const thisThread = ++curThread_body;
 
 	window.setTimeout(function(){
 		getWindowSpaceHeight(thisThread);
@@ -645,8 +668,8 @@ function getWindowSpaceHeight(thisThread) {
 	}
 
 	prevWinHeight = window.innerHeight;
-	var px16 = $("#d-tax").height();
-	var windowRatio = (px16 / 16);
+	const px16 = $("#d-tax").height();
+	const windowRatio = (px16 / 16);
 
 	setKbMaxHeight(px16*5);
 	// console.log('getWindowSpaceHeight()');
@@ -667,7 +690,7 @@ function getWindowSpaceHeight(thisThread) {
 		$("#keyboard").css('left', 0);
 		$("#keyboard").css('right', 'auto');
 
-		var fullWidth = $(".section-head").width() + (30 * windowRatio);
+		const fullWidth = $(".section-head").width() + (30 * windowRatio);
 		$("#keyboard").css('width', fullWidth + 'px');
 	}
 	return {
@@ -679,13 +702,13 @@ function getWindowSpaceHeight(thisThread) {
 function popKeyboard(ths){
 	// console.log('popKeyboard()');
 	$("body").removeClass("keyboard-hidden");
-	var targ = ths;
-	var this_val = targ.text();
+	const targ = ths;
+	const this_val = targ.text();
 
-	var win = getWindowSpaceHeight(++curThread_body);
+	const win = getWindowSpaceHeight(++curThread_body);
+	const target_pos = targ.offset().top - Math.ceil(win.height/4);
 
-	window.scrollTo(0, targ.offset().top - Math.ceil(win.height/4));
-
+	$(window).scrollTo(target_pos, 160);
 	$(window).resize(function(){
 		getWindowSpaceHeight_delay();
 	})
@@ -697,9 +720,43 @@ function popKeyboard(ths){
 	targ.addClass("active");
 
 	showPersons(targ);
+	changeKeys(targ);
 	keyboard_target = targ;
 	curVal = this_val.split('');
 	return updateKeyboard(this_val);
+}
+
+function changeKeys(targ) {
+	const classN = 'cb-hide';
+	const btn_pastable = ".changable-btn-pastable";
+	const btn_normal = ".changable-btn-normal";
+	// const btn_ctrlD = btn_pastable + ' button.mac';
+
+	const btn_00 = ".changable-btn-00";
+	const btn_0 = ".changable-btn-0";
+
+	var id = targ.attr('id');
+	if(id && id.indexOf('-paid') !== -1){
+		// for "paid" section
+
+		$(btn_0).addClass(classN);
+		$(btn_00).removeClass(classN);
+
+		const above_cell = $('#p'+(parseInt(targ.data('id')-1)+'-paid')).text();
+
+		if(id !== 'p1-paid' && above_cell !== ''){
+			$(btn_normal).addClass(classN);
+			$(btn_pastable).removeClass(classN);
+			$("#ctrl_d").data('val', above_cell);
+			return;
+		}
+	}
+	else{
+		$(btn_00).addClass(classN);
+		$(btn_0).removeClass(classN);
+	}
+	$(btn_pastable).addClass(classN);
+	$(btn_normal).removeClass(classN);
 }
 
 function toF(num) {
@@ -734,7 +791,7 @@ function goTo(param){
 	if($('.person-alert').length === 0){
 		// check if forgot select
 
-		if(keyboard_target.hasClass('d-price')) {
+		if(keyboard_target.hasClass('d-price') && keyboard_target.text()!=='') {
 			var chk_count = 0;
 			keyboard_target.parent().parent().find("input[type='checkbox']").each(function(i){
 				if(i>0 && $(this).prop('checked')) {
@@ -783,25 +840,38 @@ function goTo(param){
 }
 
 function receiveNumpad(ths){
-	var num = ths.data('num');
+	const num = ths.data('num');
 	$("#user-input").append(num);
 
-	var nums = '0123456789';
-	var allow_last = nums + '.';
-	var oprs = '+-*/';
+	const non_zeros = '123456789';
+	const nums = '0' + non_zeros;
+	const allow_last = nums + '.';
+	const oprs = '+-*/';
+	var last_char = 'NULL';
 
-	var last_char = curVal[curVal.length-1];
-	var can_use_opr = (curVal.length > 0) && (allow_last.indexOf(last_char) !== -1);
+	if(curVal.length > 0){
+		last_char = curVal[curVal.length-1];
+	}
+	const can_use_opr = (curVal.length > 0) && (allow_last.indexOf(last_char) !== -1);
+	const targetId = keyboard_target.attr('id');
+	const last_char_not_zero = (curVal.length>=1 && oprs.indexOf(last_char)===-1);
 
 	if(curVal.join('')==='0'){
 		curVal = [];
 	}
 	if(num) {
-		if(num === 'Z') {	// '0'
-			curVal.push('0');
+		if(num==='-' && curVal.length===0
+			&& targetId && targetId.indexOf('-paid')!==-1) {
+			curVal.push('0', '-');
 		}
-		else if(num === 'ZZ') {	// '00'
+		else if(num === 'ZZ' && last_char_not_zero) {	// '00'
 			curVal.push('0', '0');
+		}
+		else if(num === 'ZZZ' && last_char_not_zero) {	// '000'
+			curVal.push('0', '0', '0');
+		}
+		else if((num+'').indexOf('Z')!==-1) {	// '0'
+			curVal.push('0');
 		}
 		else if(num==='.' && nums.indexOf(last_char)===-1) {
 			curVal.push('0', '.');
@@ -814,6 +884,9 @@ function receiveNumpad(ths){
 		var opr = ths.data('opr');
 
 		switch(opr) {
+			case 'T':
+				curVal = ($('#ctrl_d').data('val')+'').split('');
+				break;
 			case 'C':
 				curVal = [];
 				break;
@@ -852,7 +925,8 @@ function addDish(callback_function){
 	return false;
 }
 
-function addPerson(){
+function addPerson(skipReturns_r){
+	var skipReturns = (skipReturns_r && skipReturns_r===true);
 	var curPerson = ++curMaxPerson;
 	var div = $("#person-row").clone();
 	div.attr("id", "");
@@ -863,7 +937,8 @@ function addPerson(){
 	div.find(".p")
 		.attr('id', 'p' + curPerson + '-total');
 	div.find(".f")
-		.attr('id', 'p' + curPerson + '-paid');
+		.attr('id', 'p' + curPerson + '-paid')
+		.data('id', curPerson);
 	div.find(".a")
 		.attr('id', 'p' + curPerson + '-ac');
 	$("#people-table").append(div);
@@ -881,7 +956,11 @@ function addPerson(){
 	// $("td.colspan").attr("colspan", curMaxPerson);
 	// $("td.td-full-width").attr("colspan", curMaxPerson + 2);
 
-	window.scrollTo(0, $(".body-bottom-anchor").offset().top);
+	if(skipReturns){
+		$(window).scrollTo($(".body-bottom-anchor"), 0);
+		return;
+	}
+	$(window).scrollTo($(".body-bottom-anchor"), 120);
 	changePName_proc(++curThread_name);
 	return mapTriggers();
 }
@@ -897,16 +976,24 @@ function changePName_proc(thisThread) {
 	var persons = [];
 	var emptyPers = [];
 
+	var classN = "cb-hide";
+	$(".a").removeClass(classN);
+	$(".pt-price").removeClass(classN);
+
 	for(var id=1; id<=curMaxPerson; id++){
 		var name = getName(id);
 		if(name !== ''){
-			$('.p' + id + '-n').removeClass('tight').html(disp(name));
+			$('.p'+id+'-n').removeClass('tight').html(disp(name));
 			if(name.length > 2){
-				$('.p' + id + '-n').addClass('tight');
+				$('.p'+id+'-n').addClass('tight');
 			}
 			persons.push(name);
 		}
-		if(name === '' || $('#p' + id + '-ac').prop('checked')===false){
+		else {
+			$('#p'+id+'-ac').addClass(classN);
+			$('#p'+id+'-total').addClass(classN);
+		}
+		if(name === '' || $('#p'+id+'-ac').prop('checked')===false){
 			emptyPers.push(id);
 		}
 	}
@@ -932,17 +1019,18 @@ function initPersons(persons){
 		persons = ['User1'];
 	}
 	for(var id=0; id<=persons.length; id++){
-		addPerson();
+		addPerson(true);
 	}
 	for(var id=0; id<persons.length; id++){
 		$('#p' + (id+1) + '-name').val(persons[id]);
 	}
-	return changePName_proc(++curThread_name);
+	changePName_proc(++curThread_name);
+	return mapTriggers();
 }
 
 function withSymbol(price) {
 	if(price < 0) {
-		return '-$' + toF(0-price);
+		return '取回$' + toF(0-price);
 	}
 	return '$' + toF(price);
 }
