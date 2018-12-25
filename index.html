@@ -3,6 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1">
+	<meta name="apple-mobile-web-app-capable" content="yes" />
 	<title>AA Cost Calculator</title>
 	<meta property="og:title" content="AA Cost Calculator" />
 	<meta property="og:description" content="AA制？輕鬆啦！" />
@@ -601,7 +602,7 @@ function getWindowSpaceHeight(thisThread) {
 	// var windowHeight = $("#keyboard").offset().top - $("html").scrollTop();
 	var windowHeight = $(window).height() - $("#keyboard").height();
 
-	if($(".disp.top").height() < (19 * windowRatio)) {
+	if($(".disp.top").height() < (22 * windowRatio)) {
 	// 	$(".kb-height").height($(".kb-height").height() - (windowMinHeight - windowHeight));
 		setKbMaxHeight(px16*4);
 		$("#keyboard").css('left', 'auto');
