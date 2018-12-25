@@ -849,18 +849,18 @@ function fetchNameFromLS(){
 	return changePName_proc(++curThread_name);
 }
 
-for(var i=1; i<=3; i++){
-	addDish();
-}
+// for(var i=1; i<=3; i++){
+// 	addDish();
+// }
 
 if(localStorage.persons) {
 	fetchNameFromLS();
 }
-else{
-	for(var i=0; i<2; i++) {
-		addPerson();
-	}
-}
+// else{
+// 	for(var i=0; i<2; i++) {
+// 		addPerson();
+// 	}
+// }
 
 function changePName(){
 	var thisThread = ++curThread_name;
