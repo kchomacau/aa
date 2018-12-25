@@ -521,6 +521,7 @@ function mapTriggers(){
 function hideKeyboard(){
 	$("body").addClass("keyboard-hidden");
 	$(window).off("resize");
+	$(window).off("scroll");
 
 	if(keyboard_target){
 		keyboard_target.removeClass("active");
@@ -583,7 +584,13 @@ function getWindowSpaceHeight_delay(){
 }
 
 function setKbMaxHeight(minH){
-	return $(".kb-height").css('max-height', ($(window).height() - minH));
+	var keyboard_bottom = $(window).height() - window.innerHeight;
+
+	if(keyboard_bottom < 0){
+		keyboard_bottom = 0;
+	}
+	$("#keyboard").css('bottom', keyboard_bottom + 'px');
+	return $(".kb-height").css('max-height', (window.innerHeight - minH));
 }
 
 function getWindowSpaceHeight(thisThread) {
@@ -600,7 +607,7 @@ function getWindowSpaceHeight(thisThread) {
 	$("#keyboard").css('width', 'auto');
 
 	// var windowHeight = $("#keyboard").offset().top - $("html").scrollTop();
-	var windowHeight = $(window).height() - $("#keyboard").height();
+	var windowHeight = window.innerHeight - $("#keyboard").height();
 
 	if($(".disp.top").height() < (22 * windowRatio)) {
 	// 	$(".kb-height").height($(".kb-height").height() - (windowMinHeight - windowHeight));
@@ -626,6 +633,9 @@ function popKeyboard(ths){
 	window.scrollTo(0, targ.offset().top - Math.ceil(win.height/4));
 
 	$(window).resize(function(){
+		getWindowSpaceHeight_delay();
+	})
+	$(window).scroll(function(){
 		getWindowSpaceHeight_delay();
 	})
 
