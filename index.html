@@ -55,10 +55,18 @@
 		</tr>
 	</table>
 	<p><a href="javascript:addPerson()">+ Add Person</a></p>
+
+	<p>&nbsp;</p>
+	<p>結帳應付 <span id="grand-total"></span></p>
+	<div class="wtax-if">
+		實付 = $
+		<div class="fake-input" id="d-real"></div>
+	</div>
 	<p class="half-btn"><a href="javascript:clearDishes()" class="crimson">Checkout</a></p><!--
  --><p class="half-btn"><a href="javascript:clearAll()" class="crimson">Reset all</a></p>
 </div>
 
+<!-- //////  WAREHOUSE  ////// -->
 <div class="warehouse">
 	<table>
 		<tr>
@@ -542,6 +550,8 @@ var curThread_keyboard = 0;
 var emptyPersons = [];
 var emptyPersons_json = [];
 
+var global_price = 0;
+
 // mapTriggers();
 
 var canMouseDown = false;
@@ -633,6 +643,9 @@ function showPersons(targ){
 
 			if(targ.attr('id')==='d-tax'){
 				$('.disp.persons').text('輸入稅項或折扣');
+			}
+			else if(targ.attr('id')==='d-real'){
+				$('.disp.persons').text('輸入實付金額');
 			}
 			else if(targ.attr('id').indexOf('-paid')!==-1) {
 				var id = targ.attr('id').split('-')[0];
@@ -1136,7 +1149,8 @@ function clearDishes(){
 }
 function clearAll(){
 	if(confirm("清除所有紀錄？")) {
-		return localStorage.removeItem("details");
+		localStorage.removeItem("details");
+		return window.location.reload();
 	}
 	return false;
 }
@@ -1236,7 +1250,7 @@ function calc(){
 
 	window.setTimeout(function(){
 		calc_proc(thisThread);
-	}, 300);
+	}, 500);
 }
 
 function calc_each(return_price_raw){
@@ -1244,20 +1258,25 @@ function calc_each(return_price_raw){
 	// CONSOLE LOG
 	vlog('calc_each()');
 
+	var total_price = 0;
 	var return_price = !(return_price_raw===false);
 	var price = [];
 	const tax_text = $("#d-tax").text();
+	const realpay_text = $("#d-real").text();
 	var tax = toNum(tax_text);
+	const realpay = toNum(realpay_text);
+	const should_skip_realpay = isNaN(realpay);
 
 	if(isNaN(tax)) {
 		tax = 1;
-		$("#d-tax").text('1');
+		$("#d-tax").text(tax);
 	}
 	var res = [];
 
 	for(var i=1; i<=curMaxDish; i++){
 		var this_row = $("#d" + i);
 		var this_price = toNum(this_row.find(".d-price").text());
+		var this_price_with_tax;
 
 		var price_for = [];	// person
 
@@ -1298,12 +1317,16 @@ function calc_each(return_price_raw){
 				price_for_json.push(pax_count);
 			}
 		}
-		var shared_price = this_price / price_for.length;
+
+		this_price_with_tax = this_price;
 
 		var with_tax = this_row.find('.d-tax').prop('checked');
 		if(with_tax) {
-			shared_price = shared_price * tax;
+			this_price_with_tax = this_price * tax;
 		}
+		var shared_price = this_price_with_tax / price_for.length;
+
+		total_price += this_price_with_tax;
 
 		// if(return_price){
 			for(var ind=0; ind<price_for.length; ind++){
@@ -1320,6 +1343,18 @@ function calc_each(return_price_raw){
 			with_tax: with_tax
 		};
 	}
+
+	if(!should_skip_realpay){
+		var total_persons = curMaxPerson - emptyPersons.length;
+		var shared_price = (realpay - total_price) / total_persons;
+		for(var i=0; i<price.length; i++){
+			price[i] += shared_price;
+		}
+	}
+
+	$("#grand-total").text(withSymbol(total_price));
+	global_price = total_price;
+
 	if(return_price){
 		return {
 			totals: price,
@@ -1343,8 +1378,8 @@ function calc_proc(thisThread){
 }
 
 function vlog(arg) {
-	return;
-	// return console.log(arg);
+	// return;
+	return console.log(arg);
 }
 
 function calc_total(){
