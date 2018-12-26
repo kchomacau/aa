@@ -118,73 +118,70 @@
 	 		<span id="user-result">0</span>
 	 	</span>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button data-num="1">1</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button data-num="2">2</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button data-num="3">3</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button class="opr" data-num="*">&times;</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button class="opr" data-opr="C">
 			<small>C</small>
 		</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button data-num="4">4</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button data-num="5">5</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button data-num="6">6</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button class="opr" data-num="-">-</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button class="mac" data-opr="B">
 			<small>delete</small>
 		</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button data-num="7">7</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button data-num="8">8</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button data-num="9">9</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button class="opr" data-num="+">+</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button class="act" data-opr="N">
 			<span class="rotate">＞</span>
 		</button>
 	</span><!--
- --><span class="colspan-2 changable-btn-0">
+ --><span class="kys">
 		<button data-num="Z">0</button>
 	</span><!--
- --><span class="changable-btn-00">
-		<button data-num="Z">0</button>
+ --><span class="kys">
+		<button data-num="ZZ">00</button>
 	</span><!--
- --><span class="changable-btn-00">
-		<button data-num="ZZZ">000</button>
-	</span><!--
- --><span>
+ --><span class="kys">
 		<button data-num=".">.</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button class="opr" data-num="/">/</button>
 	</span><!--
- --><span>
+ --><span class="kys">
 		<button class="act mac" data-opr="Q">
 			<small>OK</small>
 		</button>
@@ -570,9 +567,9 @@ var prevWinHeight = window.innerHeight;
 // const kbHeight = 270;
 // const windowMinHeight = 90;
 
-$("#keyboard button").mousedown(onMouseDown);
-$("#keyboard button").click(onClick);
-$("#keyboard button").bind('touchstart', onTouchStart);
+$("#keyboard .kys").mousedown(onMouseDown);
+$("#keyboard .kys").click(onClick);
+$("#keyboard .kys").bind('touchstart', onTouchStart);
 
 function onClick(){
 	if(canMouseDown===false)
@@ -825,34 +822,34 @@ function changeKeys(targ) {
 	// CONSOLE LOG
 	vlog('changeKeys()');
 
-	const classN = 'cb-hide';
+	// const classN = 'cb-hide';
 	// const btn_pastable = ".changable-btn-pastable";
 	// const btn_normal = ".changable-btn-normal";
 	// const btn_ctrlD = btn_pastable + ' button.mac';
 
-	const btn_00 = ".changable-btn-00";
-	const btn_0 = ".changable-btn-0";
+	// const btn_00 = ".changable-btn-00";
+	// const btn_0 = ".changable-btn-0";
 
-	var id = targ.attr('id');
-	if(id && id.indexOf('-paid') !== -1){
-		// for "paid" section
+	// var id = targ.attr('id');
+	// if(id && id.indexOf('-paid') !== -1){
+	// 	// for "paid" section
 
-		$(btn_0).addClass(classN);
-		$(btn_00).removeClass(classN);
+	// 	$(btn_0).addClass(classN);
+	// 	$(btn_00).removeClass(classN);
 
-		// const above_cell = $('#p'+(parseInt(targ.data('id')-1)+'-paid')).text();
+	// 	// const above_cell = $('#p'+(parseInt(targ.data('id')-1)+'-paid')).text();
 
-		// if(id !== 'p1-paid' && above_cell !== ''){
-		// 	$(btn_normal).addClass(classN);
-		// 	$(btn_pastable).removeClass(classN);
-		// 	$("#ctrl_d").data('val', above_cell);
-		// 	return;
-		// }
-	}
-	else{
-		$(btn_00).addClass(classN);
-		$(btn_0).removeClass(classN);
-	}
+	// 	// if(id !== 'p1-paid' && above_cell !== ''){
+	// 	// 	$(btn_normal).addClass(classN);
+	// 	// 	$(btn_pastable).removeClass(classN);
+	// 	// 	$("#ctrl_d").data('val', above_cell);
+	// 	// 	return;
+	// 	// }
+	// }
+	// else{
+	// 	$(btn_00).addClass(classN);
+	// 	$(btn_0).removeClass(classN);
+	// }
 	// $(btn_pastable).addClass(classN);
 	// $(btn_normal).removeClass(classN);
 }
@@ -946,11 +943,12 @@ function goTo(param){
 	}
 }
 
-function receiveNumpad(ths){
+function receiveNumpad(ths_parent){
 	
 	// CONSOLE LOG
 	vlog('receiveNumpad()');
 
+	const ths = ths_parent.find('button');
 	const num = ths.data('num');
 	$("#user-input").append(num);
 
