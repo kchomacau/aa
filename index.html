@@ -61,6 +61,7 @@
 	<div class="wtax-if">
 		實付 = $
 		<div class="fake-input" id="d-real"></div>
+		(<span id="diff"></span>)
 	</div>
 	<p class="half-btn"><a href="javascript:clearDishes()" class="crimson">Checkout</a></p><!--
  --><p class="half-btn"><a href="javascript:clearAll()" class="crimson">Reset all</a></p>
@@ -1184,6 +1185,13 @@ function withSymbol(price) {
 	return '$' + toF(price);
 }
 
+function withNega(price){
+	if(price < 0) {
+		return '-$' + toF(0-price);
+	}
+	return '+$' + toF(price);
+}
+
 function fetchDetailsFromLS(){
 	
 	// CONSOLE LOG
@@ -1344,13 +1352,11 @@ function calc_each(return_price_raw){
 		};
 	}
 
+	var diff = 0;
 	if(!should_skip_realpay){
-		var total_persons = curMaxPerson - emptyPersons.length;
-		var shared_price = (realpay - total_price) / total_persons;
-		for(var i=0; i<price.length; i++){
-			price[i] += shared_price;
-		}
+		diff = (realpay - total_price);
 	}
+	$("#diff").text(withNega(diff));
 
 	$("#grand-total").text(withSymbol(total_price));
 	global_price = total_price;
