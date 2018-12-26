@@ -63,8 +63,15 @@
 		<div class="fake-input" id="d-real"></div>
 		(<span id="diff"></span>)
 	</div>
-	<p class="half-btn"><a href="javascript:clearDishes()" class="crimson">Checkout</a></p><!--
- --><p class="half-btn"><a href="javascript:clearAll()" class="crimson">Reset all</a></p>
+	<p class="half-btn">
+		<a href="javascript:clearDishes()" class="crimson">Checkout</a>
+	</p><!--
+ --><p class="half-btn">
+ 		<a href="javascript:clearBalance()" class="crimson">Reset balance</a>
+ 	</p><!--
+ --><p class="half-btn">
+ 		<a href="javascript:clearAll()" class="crimson">Reset all</a>
+ 	</p>
 </div>
 
 <!-- //////  WAREHOUSE  ////// -->
@@ -206,7 +213,7 @@ div.fake-input,
 	box-sizing: border-box;
 }
 p.half-btn {
-	width: 50%;
+	width: 33.3%;
 	display: inline-block;
 	vertical-align: middle;
 	margin-bottom: 0;
@@ -350,6 +357,7 @@ body, p, h1, h2, button, input {
 }
 body {
 	padding: 15px;
+	padding-bottom: 0;
 }
 body, p {
 	font-size: 13px;
@@ -556,6 +564,7 @@ var global_price = 0;
 // mapTriggers();
 
 var canMouseDown = false;
+var canTouch = false;
 var prevWinHeight = window.innerHeight;
 
 // const kbHeight = 270;
@@ -563,18 +572,29 @@ var prevWinHeight = window.innerHeight;
 
 $("#keyboard button").mousedown(onMouseDown);
 $("#keyboard button").click(onClick);
+$("#keyboard button").bind('touchstart', onTouchStart);
 
+function onClick(){
+	if(canMouseDown===false)
+		return receiveNumpad($(this));
+	return false;
+}
 function onMouseDown(){
 	if(canMouseDown===false){
 		canMouseDown = true;
 		$("#keyboard button").off("click");
 	}
-	return receiveNumpad($(this));
-}
-function onClick(){
-	if(canMouseDown===false)
+	if(canTouch===false)
 		return receiveNumpad($(this));
 	return false;
+}
+function onTouchStart(){
+	if(canTouch===false){
+		canTouch = true;
+		$("#keyboard button").off("click");
+		$("#keyboard button").off("mousedown");
+	}
+	return receiveNumpad($(this));
 }
 
 function toNum(string){
@@ -980,8 +1000,9 @@ function receiveNumpad(ths){
 				curVal = ($('#ctrl_d').data('val')+'').split('');
 				break;
 			case 'C':
-				if(is_pay_table){
-					curVal = (keyboard_target.data('original')+'').split("");
+				var orig_val = keyboard_target.data('original');
+				if(!isNaN(orig_val)){
+					curVal = (orig_val+'').split("");
 				}
 				else{
 					curVal = [];
@@ -1148,9 +1169,16 @@ function clearDishes(){
 	}
 	return false;
 }
+function clearBalance(){
+	if(confirm("清除所有結餘？")) {
+		localStorage.removeItem("details");
+		return window.location.reload();
+	}
+	return false;
+}
 function clearAll(){
 	if(confirm("清除所有紀錄？")) {
-		localStorage.removeItem("details");
+		localStorage.clear();
 		return window.location.reload();
 	}
 	return false;
@@ -1258,7 +1286,7 @@ function calc(){
 
 	window.setTimeout(function(){
 		calc_proc(thisThread);
-	}, 500);
+	}, 300);
 }
 
 function calc_each(return_price_raw){
@@ -1384,8 +1412,8 @@ function calc_proc(thisThread){
 }
 
 function vlog(arg) {
-	// return;
-	return console.log(arg);
+	return;
+	// return console.log(arg);
 }
 
 function calc_total(){
